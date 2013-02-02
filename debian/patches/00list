@@ -7,3 +7,4 @@
 567593_improve_info_and_faq
 fix_infinite_loop_r5264
 mips_gcc4.4
+CVE-2012-6085

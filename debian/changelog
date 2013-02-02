@@ -1,3 +1,10 @@
+gnupg (1.4.10-4+squeeze1) stable-security; urgency=high
+
+  * Apply upstream patch to fix memory and key database corruption
+    when importing with invalid keys (CVE-2012-6085, closes: #697108).
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Wed, 02 Jan 2013 20:43:39 +0100
+
 gnupg (1.4.10-4) unstable; urgency=high
 
   * debian/patches/mips_gcc4.4: added to fix build failure on
