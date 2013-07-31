@@ -8,3 +8,4 @@
 fix_infinite_loop_r5264
 mips_gcc4.4
 CVE-2012-6085
+CVE-2013-4242
