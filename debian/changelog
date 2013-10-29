@@ -1,3 +1,12 @@
+gnupg (1.4.10-4+squeeze3) squeeze-security; urgency=high
+
+  * Apply upstream patch to fix infinite recursion in the
+    compressed packet parser (CVE-2013-4402, closes: #725439).
+  * Apply upstream patch to fix treating no-usage-permitted
+    keys as all-usages-permitted (CVE-2013-4351, closes: #722722).
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Wed, 09 Oct 2013 18:14:40 +0200
+
 gnupg (1.4.10-4+squeeze2) squeeze-security; urgency=high
 
   * Apply upstream patch to fix side channel attack on RSA
