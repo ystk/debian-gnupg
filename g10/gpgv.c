@@ -1,6 +1,6 @@
 /* gpgv.c - The GnuPG signature verify utility
  * Copyright (C) 1998, 1999, 2000, 2001, 2002, 2005, 2006,
- *               2009 Free Software Foundation, Inc.
+ *               2009, 2012 Free Software Foundation, Inc.
  *
  * This file is part of GnuPG.
  *
@@ -56,7 +56,7 @@ enum cmd_and_opt_values { aNull = 0,
     oVerbose	  = 'v',
     oBatch	  = 500,
     oKeyring,
-    oIgnoreTimeConflict,                      
+    oIgnoreTimeConflict,
     oStatusFD,
     oLoggerFD,
     oHomedir,
@@ -70,7 +70,7 @@ static ARGPARSE_OPTS opts[] = {
     { oVerbose, "verbose",   0, N_("verbose") },
     { oQuiet,	"quiet",     0, N_("be somewhat more quiet") },
     { oKeyring, "keyring"   ,2, N_("take the keys from this keyring")},
-    { oIgnoreTimeConflict, "ignore-time-conflict", 0, 
+    { oIgnoreTimeConflict, "ignore-time-conflict", 0,
                            N_("make timestamp conflicts only a warning") },
     { oStatusFD, "status-fd" ,1, N_("|FD|write status info to this FD") },
     { oLoggerFD, "logger-fd",1, "@" },
@@ -148,10 +148,10 @@ main( int argc, char **argv )
 
     tty_no_terminal(1);
     tty_batchmode(1);
-    disable_dotlock();
+    dotlock_disable ();
 
     set_native_charset (NULL); /* Try to auto set the character set */
-    
+
     pargs.argc = &argc;
     pargs.argv = &argv;
     pargs.flags=  1;  /* do not remove the args */
@@ -181,9 +181,9 @@ main( int argc, char **argv )
         keydb_add_resource ("trustedkeys" EXTSEP_S "gpg", 8, 0);
     for(sl = nrings; sl; sl = sl->next )
         keydb_add_resource (sl->d, 8, 0 );
-    
+
     FREE_STRLIST(nrings);
-    
+
     if( (rc = verify_signatures( argc, argv ) ))
         log_error("verify signatures failed: %s\n", g10_errstr(rc) );
 
@@ -203,7 +203,7 @@ g10_exit( int rc )
 
 
 /* Stub:
- * We have to override the trustcheck from pkclist.c becuase 
+ * We have to override the trustcheck from pkclist.c becuase
  * this utility assumes that all keys in the keyring are trustworthy
  */
 int
@@ -214,9 +214,10 @@ check_signatures_trust( PKT_signature *sig )
 
 void
 read_trust_options(byte *trust_model,ulong *created,ulong *nextcheck,
-		   byte *marginals,byte *completes,byte *cert_depth) {}
+		   byte *marginals,byte *completes,byte *cert_depth,
+		   byte *min_cert_level) {}
 
-/* Stub: 
+/* Stub:
  * We don't have the trustdb , so we have to provide some stub functions
  * instead
  */
@@ -336,7 +337,7 @@ check_secret_key( PKT_secret_key *sk, int n )
 }
 
 /* Stub:
- * No secret key, so no passphrase needed 
+ * No secret key, so no passphrase needed
  */
 DEK *
 passphrase_to_dek( u32 *keyid, int pubkey_algo,
@@ -418,15 +419,22 @@ void tty_kill_prompt(void) {}
 int tty_get_answer_is_yes( const char *prompt ) {return 0;}
 int tty_no_terminal(int onoff) {return 0;}
 void tty_cleanup_after_signal (void) {}
+#ifdef __VMS
+FILE *ttyfp_is (void) { return stderr; }
+void init_ttyfp (void) { }
+#endif /*__VMS*/
 #ifdef HAVE_LIBREADLINE
 void tty_enable_completion(rl_completion_func_t *completer) {}
 void tty_disable_completion(void) {}
+void rl_cleanup_after_signal (void) {}
+void rl_free_line_state (void) {}
 #endif
 
 /* We do not do any locking, so use these stubs here */
-void disable_dotlock(void) {}
-DOTLOCK create_dotlock( const char *file_to_lock ) { return NULL; }
-void destroy_dotlock (DOTLOCK h) {}
-int make_dotlock( DOTLOCK h, long timeout ) { return 0;}
-int release_dotlock( DOTLOCK h ) {return 0;}
-void remove_lockfiles(void) {}
+void dotlock_disable(void) {}
+dotlock_t dotlock_create (const char *file_to_lock, unsigned int flags)
+{ return NULL; }
+void dotlock_destroy (dotlock_t h) {}
+int dotlock_take (dotlock_t h, long timeout) { return 0;}
+int dotlock_release (dotlock_t h) {return 0;}
+void dotlock_remove_lockfiles (void) {}

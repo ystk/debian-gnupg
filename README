@@ -1,11 +1,11 @@
 
 		    GnuPG - The GNU Privacy Guard
 		   -------------------------------
-                            Version 1.4.10
+                            Version 1.4.12
 
-	 Copyright 1998, 1999, 2000, 2001, 2002, 2003, 
-                   2004, 2005, 2006, 2007, 2008,
-                   2009  Free Software Foundation, Inc.
+	 Copyright 1998, 1999, 2000, 2001, 2002, 2003,
+                   2004, 2005, 2006, 2007, 2008, 2009,
+                   2010, 2012  Free Software Foundation, Inc.
 
     This file is free software; as a special exception the author
     gives unlimited permission to copy and/or distribute it, with or
@@ -23,7 +23,7 @@
     GnuPG is GNU's tool for secure communication and data storage.
     It can be used to encrypt data and to create digital signatures.
     It includes an advanced key management facility and is compliant
-    with the proposed OpenPGP Internet standard as described in RFC2440.
+    with the proposed OpenPGP Internet standard as described in RFC4880.
 
     GnuPG works best on GNU/Linux or *BSD systems.  Most other Unices
     are also supported but are not as well tested as the Free Unices.
@@ -142,7 +142,7 @@
 	http://www.gnupg.org/documentation/howtos.html
 
     A man page with a description of all commands and options gets installed
-    along with the program. 
+    along with the program.
 
 
     Introduction
@@ -467,13 +467,13 @@
     detailed information about the errors.
 
 
-    Configure options 
+    Configure options
     -----------------
 
-    Here is a list of configure options which are sometime useful 
+    Here is a list of configure options which are sometime useful
     for installation.
 
-    --enable-static-rnd=<name> 
+    --enable-static-rnd=<name>
                      Force the use of the random byte gathering
 		     module <name>.  Default is either to use /dev/random
 		     or the auto mode.  Value for name:
@@ -485,9 +485,9 @@
 		     linux - Use the module which accesses /dev/random.
 			     This is the first choice and the default one
 			     for GNU/Linux or *BSD.
-                      auto - Compile linux, egd and unix in and 
+                      auto - Compile linux, egd and unix in and
                              automagically select at runtime.
-  
+
      --with-egd-socket=<name>
                      This is only used when EGD is used as random
                      gatherer. GnuPG uses by default "~/.gnupg/entropy"
@@ -497,13 +497,13 @@
                      "~/" uses the socket in the home directory of the user
                      and one starting with a "=" uses a socket in the
                      GnuPG home directory which is "~/.gnupg" by default.
- 
+
      --without-readline
                      Do not include support for the readline library
                      even if it is available.  The default is to check
                      whether the readline library is a available and
                      use it to allow fancy command line editing.
-  
+
      --with-included-zlib
                      Forces usage of the local zlib sources. Default is
 		     to use the (shared) library of the system.
@@ -530,15 +530,15 @@
                      (e.g. SunOS 5.7 on UltraSparc-2) and might give
                      you a bus error.
 
-     --disable-dynload 
+     --disable-dynload
                     If you have problems with dynamic loading, this
                     option disables all dynamic loading stuff.  Note
                     that the use of dynamic linking is very limited.
 
      --disable-asm
-                    Do not use assembler modules.  It is not possible 
+                    Do not use assembler modules.  It is not possible
                     to use this on some CPU types.
-                    
+
      --disable-exec
                     Disable all remote program execution.  This
 		    disables photo ID viewing as well as all keyserver
@@ -595,14 +595,14 @@
 		    --disable-cast5, --disable-blowfish,
 		    --disable-aes, --disable-twofish,
 		    --disable-sha256, --disable-sha512,
-		    --without-bzip2, --disable-exec, 
+		    --without-bzip2, --disable-exec,
                     --disable-card-support and
 		    --disable-agent-support.
                     Configure command lines are read from left to
 		    right, so if you want to have an "almost minimal"
 		    configuration, you can do (for example)
 		    "--enable-minimal --enable-rsa" to have RSA added
-		    to the minimal build.  Adding the option 
+		    to the minimal build.  Adding the option
                     --disable-nls may be useful too.
 
      --enable-key-cache=SIZE
@@ -623,10 +623,10 @@
 
      --enable-selinux-support
                     This prevents access to certain files and won't
-                    allow import or export of secret keys. 
+                    allow import or export of secret keys.
 
      --enable-noexecstack
-                    Pass option --noexecstack to as.  Autdetect wether
+                    Pass option --noexecstack to as.  Autodetect wether
                     the tool chain actually support this.
 
      --disable-gnupg-iconv
@@ -719,7 +719,7 @@
 
     Random devices are available in Linux, FreeBSD and OpenBSD.
     Operating systems without a random devices must use another
-    entropy collector. 
+    entropy collector.
 
     This collector works by running a lot of commands that yield more
     or less unpredictable output and feds this as entropy into the
@@ -764,18 +764,21 @@
     Apple like curl, zip, and BZ2) are universal.
 
 
-    GnuPG 1.4 and GnuPG 2.0
+    GnuPG 1.4 and GnuPG 2.x
     -----------------------
 
-    GnuPG 2.0 is a newer version of GnuPG with additional support for
+    GnuPG 2.x is a newer version of GnuPG with additional support for
     S/MIME.  It has a different design philosophy that splits
     functionality up into several modules.  Both versions may be
-    installed simultaneously without any conflict (gpg is called gpg2
-    in GnuPG 2).  In fact, the gpg version from GnuPG 1.4 is able to
-    make use of the gpg-agent as included in GnuPG 2 and allows for
-    seamless passphrase caching.  The advantage of GnupG 1.4 is its
-    smaller size and no dependency on other modules at run and build
-    time.
+    installed simultaneously without any conflict (gpg is usually
+    installed under the name gpg2 in GnuPG-2).  In fact, the GPG
+    version from GnuPG 1.4 is able to make use of the gpg-agent as
+    included in GnuPG-2 and allows for seamless passphrase caching.
+    The advantage of GnuPG 1.4 is its somewhat smaller size and no
+    dependency on other modules at run and build time.  The drawback
+    of 1.4 is its much older code base and that only minimal
+    maintainance is done.  It is highly suggested to switch to 2.x
+    unless your system is not supported by 2.x
 
 
     How to Get More Information
@@ -819,9 +822,9 @@
     Please direct questions about GnuPG to the users mailing list or
     one of the pgp newsgroups; please do not direct questions to one
     of the authors directly as we are busy working on improvements and
-    bug fixes.  The English and German mailing lists are watched by
-    the authors and we try to answer questions when time allows us to
-    do so.
+    bug fixes.  The English and German GnupG mailing lists are watched
+    by the authors and we try to answer questions when time allows us
+    to do so.
 
     Commercial grade support for GnuPG is available; please see
     http://www.gnupg.org/service.html .

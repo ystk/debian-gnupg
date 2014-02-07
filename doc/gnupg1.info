@@ -1,6 +1,7 @@
-This is gnupg1.info, produced by makeinfo version 4.13 from gnupg1.texi.
+This is /home/wk/w/gnupg-stable/doc/gnupg1.info, produced by makeinfo
+version 4.13 from /home/wk/w/gnupg-stable/doc/gnupg1.texi.
 
-This is the `The GNU Privacy Guard Manual' (1.4.10, 11 December 2008).
+This is the `The GNU Privacy Guard Manual' (1.4.12, 20 January 2012).
 
    Copyright (C) 1998, 1999, 2000, 2001, 2002, 2004, 2005, 2006 Free
 Software Foundation, Inc.
@@ -13,7 +14,7 @@ Software Foundation, Inc.
 
 INFO-DIR-SECTION GNU Utilities
 START-INFO-DIR-ENTRY
-* gpg: (gpg).            OpenPGP encryption and signing tool (v1).
+* gpg: (gnupg1).            OpenPGP encryption and signing tool (v1).
 END-INFO-DIR-ENTRY
 
 
@@ -22,7 +23,7 @@ File: gnupg1.info,  Node: Top,  Next: Invoking GPG,  Up: (dir)
 Using the GnuPG Version 1.4
 ***************************
 
-This is the `The GNU Privacy Guard Manual' (1.4.10, 11 December 2008).
+This is the `The GNU Privacy Guard Manual' (1.4.12, 20 January 2012).
 
    Copyright (C) 1998, 1999, 2000, 2001, 2002, 2004, 2005, 2006 Free
 Software Foundation, Inc.
@@ -58,18 +59,23 @@ OpenPGP standard. `gpg' features complete key management and all bells
 and whistles you can expect from a decent OpenPGP implementation.
 
    This is the standalone version of `gpg'.  For desktop use you should
-consider using `gpg2'.
+consider using `gpg2' (1).
 
    *Note Option Index::, for an index to `gpg''s commands and options.
 
 * Menu:
 
-* GPG Commands::        List of all commands.
-* GPG Options::         List of all options.
-* GPG Configuration::   Configuration files.
-* GPG Examples::        Some usage examples.
+* GPG Commands::            List of all commands.
+* GPG Options::             List of all options.
+* GPG Configuration::       Configuration files.
+* GPG Examples::            Some usage examples.
 
 Developer information:
+* Unattended Usage of GPG:: Using `gpg' from other programs.
+
+   ---------- Footnotes ----------
+
+   (1) On some platforms gpg2 is installed under the name `gpg'
 
 
 File: gnupg1.info,  Node: GPG Commands,  Next: GPG Options,  Up: Invoking GPG
@@ -408,10 +414,11 @@ File: gnupg1.info,  Node: Operational GPG Commands,  Next: OpenPGP Key Managemen
      STDIN.  With the second form (or a deprecated "*" as algo) digests
      for all available algorithms are printed.
 
-`--gen-random `0|1|2''
-     Emit COUNT random bytes of the given quality level. If count is
-     not given or zero, an endless sequence of random bytes will be
-     emitted.  PLEASE, don't use this command unless you know what you
+`--gen-random `0|1|2' `count''
+     Emit COUNT random bytes of the given quality level 0, 1 or 2. If
+     COUNT is not given or zero, an endless sequence of random bytes
+     will be emitted.  If used with `--armor' the output will be base64
+     encoded.  PLEASE, don't use this command unless you know what you
      are doing; it may remove precious entropy from the system!
 
 `--gen-prime `mode'  `bits''
@@ -458,33 +465,33 @@ This section explains the main commands for key management
 
     uid `n'
           Toggle selection of user ID or photographic user ID with
-          index `n'.  Use 0 to deselect all.
+          index `n'.    Use `*' to select all and `0' to deselect all.
 
     key `n'
-          Toggle selection of subkey with index `n'.  Use 0 to deselect
-          all.
+          Toggle selection of subkey with index `n'.    Use `*' to
+          select all and `0' to deselect all.
 
     sign
           Make a signature on key of user `name' If the key is not yet
           signed by the default user (or the users given with -u), the
-          program displays the information of the key again, together
-          with its fingerprint and asks whether it should be signed.
-          This question is repeated for all users specified with -u.
+          program   displays the information of the key again, together
+          with its   fingerprint and asks whether it should be signed.
+          This question is   repeated for all users specified with   -u.
 
     lsign
           Same as "sign" but the signature is marked as non-exportable
-          and will therefore never be used by others. This may be used
-          to make keys valid only in the local environment.
+          and will   therefore never be used by others. This may be
+          used to make keys   valid only in the local environment.
 
     nrsign
           Same as "sign" but the signature is marked as non-revocable
-          and can therefore never be revoked.
+          and can   therefore never be revoked.
 
     tsign
           Make a trust signature. This is a signature that combines the
-          notions of certification (like a regular signature), and
-          trust (like the "trust" command). It is generally only useful
-          in distinct communities or groups.
+          notions   of certification (like a regular signature), and
+          trust (like the   "trust" command). It is generally only
+          useful in distinct communities   or groups.
 
      Note that "l" (for local / non-exportable), "nr" (for
      non-revocable, and "t" (for trust) may be freely mixed and
@@ -492,13 +499,13 @@ This section explains the main commands for key management
 
     delsig
           Delete a signature. Note that it is not possible to retract a
-          signature, once it has been send to the public (i.e. to a
-          keyserver).  In that case you better use `revsig'.
+          signature,   once it has been send to the public (i.e. to a
+          keyserver).  In that case   you better use `revsig'.
 
     revsig
           Revoke a signature. For every signature which has been
-          generated by one of the secret keys, GnuPG asks whether a
-          revocation certificate should be generated.
+          generated by   one of the secret keys, GnuPG asks whether a
+          revocation certificate   should be generated.
 
     check
           Check the signatures on all selected user IDs.
@@ -508,18 +515,19 @@ This section explains the main commands for key management
 
     addphoto
           Create a photographic user ID. This will prompt for a JPEG
-          file that will be embedded into the user ID. Note that a very
-          large JPEG will make for a very large key. Also note that
-          some programs will display your JPEG unchanged (GnuPG), and
-          some programs will scale it to fit in a dialog box (PGP).
+          file that   will be embedded into the user ID. Note that a
+          very large JPEG will make   for a very large key. Also note
+          that some programs will display your   JPEG unchanged
+          (GnuPG), and some programs will scale it to fit in a   dialog
+          box (PGP).
 
     showphoto
           Display the selected photographic user ID.
 
     deluid
           Delete a user ID or photographic user ID.  Note that it is not
-          possible to retract a user id, once it has been send to the
-          public (i.e. to a keyserver).  In that case you better use
+           possible to retract a user id, once it has been send to the
+          public   (i.e. to a keyserver).  In that case you better use
           `revuid'.
 
     revuid
@@ -527,63 +535,65 @@ This section explains the main commands for key management
 
     primary
           Flag the current user id as the primary one, removes the
-          primary user id flag from all other user ids and sets the
-          timestamp of all affected self-signatures one second ahead.
-          Note that setting a photo user ID as primary makes it primary
-          over other photo user IDs, and setting a regular user ID as
-          primary makes it primary over other regular user IDs.
+          primary user   id flag from all other user ids and sets the
+          timestamp of all affected   self-signatures one second ahead.
+          Note that setting a photo user ID   as primary makes it
+          primary over other photo user IDs, and setting a   regular
+          user ID as primary makes it primary over other regular user
+          IDs.
 
     keyserver
           Set a preferred keyserver for the specified user ID(s). This
-          allows other users to know where you prefer they get your key
-          from. See `--keyserver-options honor-keyserver-url' for more
-          on how this works.  Setting a value of "none" removes an
-          existing preferred keyserver.
+          allows   other users to know where you prefer they get your
+          key from. See   `--keyserver-options honor-keyserver-url' for
+          more on how this   works.  Setting a value of "none" removes
+          an existing preferred   keyserver.
 
     notation
           Set a name=value notation for the specified user ID(s). See
           `--cert-notation' for more on how this works. Setting a value
-          of "none" removes all notations, setting a notation prefixed
-          with a minus sign (-) removes that notation, and setting a
-          notation name (without the =value) prefixed with a minus sign
-          removes all notations with that name.
+          of   "none" removes all notations, setting a notation
+          prefixed with a minus   sign (-) removes that notation, and
+          setting a notation name (without the   =value) prefixed with
+          a minus sign removes all notations with that name.
 
     pref
           List preferences from the selected user ID. This shows the
-          actual preferences, without including any implied preferences.
+          actual   preferences, without including any implied
+          preferences.
 
     showpref
           More verbose preferences listing for the selected user ID.
-          This shows the preferences in effect by including the implied
-          preferences of 3DES (cipher), SHA-1 (digest), and
-          Uncompressed (compression) if they are not already included
-          in the preference list. In addition, the preferred keyserver
-          and signature notations (if any) are shown.
+          This shows   the preferences in effect by including the
+          implied preferences of 3DES   (cipher), SHA-1 (digest), and
+          Uncompressed (compression) if they are   not already included
+          in the preference list. In addition, the   preferred
+          keyserver and signature notations (if any) are shown.
 
     setpref `string'
           Set the list of user ID preferences to `string' for all (or
-          just the selected) user IDs. Calling setpref with no
-          arguments sets the preference list to the default (either
-          built-in or set via `--default-preference-list'), and calling
-          setpref with "none" as the argument sets an empty preference
-          list. Use `gpg --version' to get a list of available
-          algorithms. Note that while you can change the preferences on
-          an attribute user ID (aka "photo ID"), GnuPG does not select
-          keys via attribute user IDs so these preferences will not be
-          used by GnuPG.
+          just   the selected) user IDs. Calling setpref with no
+          arguments sets the   preference list to the default (either
+          built-in or set via   `--default-preference-list'), and
+          calling setpref with "none"   as the argument sets an empty
+          preference list. Use `gpg   --version' to get a list of
+          available algorithms. Note that while you   can change the
+          preferences on an attribute user ID (aka "photo ID"),   GnuPG
+          does not select keys via attribute user IDs so these
+          preferences   will not be used by GnuPG.
 
           When setting preferences, you should list the algorithms in
-          the order which you'd like to see them used by someone else
-          when encrypting a message to your key.  If you don't include
-          3DES, it will be automatically added at the end.  Note that
-          there are many factors that go into choosing an algorithm
-          (for example, your key may not be the only recipient), and so
-          the remote OpenPGP application being used to send to you may
-          or may not follow your exact chosen order for a given
-          message.  It will, however, only choose an algorithm that is
-          present on the preference list of every recipient key.  See
-          also the INTEROPERABILITY WITH OTHER OPENPGP PROGRAMS section
-          below.
+          the order   which you'd like to see them used by someone else
+          when encrypting a   message to your key.  If you don't
+          include 3DES, it will be   automatically added at the end.
+          Note that there are many factors that   go into choosing an
+          algorithm (for example, your key may not be the   only
+          recipient), and so the remote OpenPGP application being used
+          to   send to you may or may not follow your exact chosen
+          order for a given   message.  It will, however, only choose
+          an algorithm that is present   on the preference list of
+          every recipient key.  See also the   INTEROPERABILITY WITH
+          OTHER OPENPGP PROGRAMS section below.
 
     addkey
           Add a subkey to this key.
@@ -593,53 +603,54 @@ This section explains the main commands for key management
 
     keytocard
           Transfer the selected secret subkey (or the primary key if no
-          subkey has been selected) to a smartcard. The secret key in
-          the keyring will be replaced by a stub if the key could be
-          stored successfully on the card and you use the save command
-          later. Only certain key types may be transferred to the card.
-          A sub menu allows you to select on what card to store the
-          key. Note that it is not possible to get that key back from
-          the card - if the card gets broken your secret key will be
-          lost unless you have a backup somewhere.
+          subkey   has been selected) to a smartcard. The secret key in
+          the keyring will   be replaced by a stub if the key could be
+          stored successfully on the   card and you use the save
+          command later. Only certain key types may be   transferred to
+          the card. A sub menu allows you to select on what card   to
+          store the key. Note that it is not possible to get that key
+          back   from the card - if the card gets broken your secret
+          key will be lost   unless you have a backup somewhere.
 
     bkuptocard `file'
           Restore the given file to a card. This command may be used to
-          restore a backup key (as generated during card
-          initialization) to a new card. In almost all cases this will
-          be the encryption key. You should use this command only with
-          the corresponding public key and make sure that the file
-          given as argument is indeed the backup to restore. You should
-          then select 2 to restore as encryption key.  You will first
-          be asked to enter the passphrase of the backup key and then
-          for the Admin PIN of the card.
+          restore a   backup key (as generated during card
+          initialization) to a new card. In   almost all cases this
+          will be the encryption key. You should use this   command
+          only with the corresponding public key and make sure that the
+           file given as argument is indeed the backup to restore. You
+          should then   select 2 to restore as encryption key.  You
+          will first be asked to enter   the passphrase of the backup
+          key and then for the Admin PIN of the card.
 
     delkey
           Remove a subkey (secondart key). Note that it is not possible
-          to retract a subkey, once it has been send to the public
-          (i.e. to a keyserver).  In that case you better use `revkey'.
+          to retract   a subkey, once it has been send to the public
+          (i.e. to a keyserver).  In   that case you better use
+          `revkey'.
 
     revkey
           Revoke a subkey.
 
     expire
           Change the key or subkey expiration time. If a subkey is
-          selected, the expiration time of this subkey will be changed.
-          With no selection, the key expiration of the primary key is
-          changed.
+          selected, the   expiration time of this subkey will be
+          changed. With no selection, the   key expiration of the
+          primary key is changed.
 
     trust
           Change the owner trust value for the key. This updates the
-          trust-db immediately and no save is required.
+          trust-db   immediately and no save is required.
 
     disable
     enable
           Disable or enable an entire key. A disabled key can not
-          normally be used for encryption.
+          normally be   used for encryption.
 
     addrevoker
           Add a designated revoker to the key. This takes one optional
-          argument: "sensitive". If a designated revoker is marked as
-          sensitive, it will not be exported by default (see
+          argument:   "sensitive". If a designated revoker is marked as
+          sensitive, it will   not be exported by default (see
           export-options).
 
     passwd
@@ -650,44 +661,45 @@ This section explains the main commands for key management
 
     clean
           Compact (by removing all signatures except the selfsig) any
-          user ID that is no longer usable (e.g. revoked, or expired).
-          Then, remove any signatures that are not usable by the trust
-          calculations.  Specifically, this removes any signature that
-          does not validate, any signature that is superseded by a
-          later signature, revoked signatures, and signatures issued by
-          keys that are not present on the keyring.
+          user ID   that is no longer usable (e.g. revoked, or
+          expired). Then, remove any   signatures that are not usable
+          by the trust calculations.    Specifically, this removes any
+          signature that does not validate, any   signature that is
+          superseded by a later signature, revoked signatures,   and
+          signatures issued by keys that are not present on the keyring.
 
     minimize
           Make the key as small as possible. This removes all
-          signatures from each user ID except for the most recent
+          signatures from   each user ID except for the most recent
           self-signature.
 
     cross-certify
           Add cross-certification signatures to signing subkeys that
-          may not currently have them. Cross-certification signatures
-          protect against a subtle attack against signing subkeys. See
-          `--require-cross-certification'.  All new keys generated have
-          this signature by default, so this option is only useful to
-          bring older keys up to date.
+          may not   currently have them. Cross-certification signatures
+          protect against a   subtle attack against signing subkeys. See
+           `--require-cross-certification'.  All new keys generated have
+           this signature by default, so this option is only useful to
+          bring   older keys up to date.
 
     save
           Save all changes to the key rings and quit.
 
     quit
-          Quit the program without updating the key rings.
-
+          Quit the program without updating the   key rings.
 
      The listing shows you the key with its secondary keys and all user
-     ids. Selected keys or user ids are indicated by an asterisk. The
-     trust value is displayed with the primary key: the first is the
-     assigned owner trust and the second is the calculated trust value.
-     Letters are used for the values:
+     ids.  The primary user id is indicated by a dot, and selected keys
+     or user ids are indicated by an asterisk.  The trust value is
+     displayed with the primary key: the first is the assigned owner
+     trust and the second is the calculated trust value. Letters are
+     used for the values:
 
     -
           No ownertrust assigned / not yet calculated.
 
     e
-          Trust calculation has failed; probably due to an expired key.
+          Trust   calculation has failed; probably due to an expired
+          key.
 
     q
           Not enough information for calculation.
@@ -703,6 +715,7 @@ This section explains the main commands for key management
 
     u
           Ultimately trusted.
+
 
 `--sign-key `name''
      Signs a public key with your secret key. This is a shortcut
@@ -720,8 +733,8 @@ File: gnupg1.info,  Node: GPG Options,  Next: GPG Configuration,  Prev: GPG Comm
 1.2 Option Summary
 ==================
 
-`gpg' comes features a bunch of options to control the exact behaviour
-and to change the default configuration.
+`gpg' features a bunch of options to control the exact behaviour and to
+change the default configuration.
 
 * Menu:
 
@@ -811,9 +824,12 @@ in the option file.
      are:
 
     show-photos
-          Causes `--list-keys', `--list-sigs', `--list-public-keys',
-          and `--list-secret-keys' to display any photo IDs attached to
-          the key.  Defaults to no. See also `--photo-viewer'.
+          Causes `--list-keys', `--list-sigs',   `--list-public-keys',
+          and `--list-secret-keys' to   display any photo IDs attached
+          to the key.  Defaults to no. See also   `--photo-viewer'.
+          Does not work with `--with-colons':   see `--attribute-fd'
+          for the appropriate way to get photo data   for scripts and
+          other frontends.
 
     show-policy-urls
           Show policy URLs in the `--list-sigs' or `--check-sigs'
@@ -823,8 +839,8 @@ in the option file.
     show-std-notations
     show-user-notations
           Show all, IETF standard, or user-defined signature notations
-          in the `--list-sigs' or `--check-sigs' listings. Defaults to
-          no.
+          in the   `--list-sigs' or `--check-sigs' listings. Defaults
+          to no.
 
     show-keyserver-urls
           Show any preferred keyserver URL in the `--list-sigs' or
@@ -832,7 +848,7 @@ in the option file.
 
     show-uid-validity
           Display the calculated validity of user IDs during key
-          listings.  Defaults to no.
+          listings.    Defaults to no.
 
     show-unusable-uids
           Show revoked and expired user IDs in key listings. Defaults
@@ -844,18 +860,19 @@ in the option file.
 
     show-keyring
           Display the keyring name at the head of key listings to show
-          which keyring a given key resides on. Defaults to no.
+          which   keyring a given key resides on. Defaults to no.
 
     show-sig-expire
           Show signature expiration dates (if any) during `--list-sigs'
-          or `--check-sigs' listings. Defaults to no.
+          or   `--check-sigs' listings. Defaults to no.
 
     show-sig-subpackets
           Include signature subpackets in the key listing. This option
-          can take an optional argument list of the subpackets to list.
-          If no argument is passed, list all subpackets. Defaults to
-          no. This option is only meaningful when using `--with-colons'
-          along with `--list-sigs' or `--check-sigs'.
+          can take an   optional argument list of the subpackets to
+          list. If no argument is   passed, list all subpackets.
+          Defaults to no. This option is only   meaningful when using
+          `--with-colons' along with   `--list-sigs' or `--check-sigs'.
+
 
 `--verify-options `parameters''
      This is a space or comma delimited string that gives options used
@@ -864,7 +881,7 @@ in the option file.
 
     show-photos
           Display any photo IDs present on the key that issued the
-          signature.  Defaults to no. See also `--photo-viewer'.
+          signature.    Defaults to no. See also `--photo-viewer'.
 
     show-policy-urls
           Show policy URLs in the signature being verified. Defaults to
@@ -874,35 +891,35 @@ in the option file.
     show-std-notations
     show-user-notations
           Show all, IETF standard, or user-defined signature notations
-          in the signature being verified. Defaults to IETF standard.
+          in the   signature being verified. Defaults to IETF standard.
 
     show-keyserver-urls
           Show any preferred keyserver URL in the signature being
-          verified.  Defaults to no.
+          verified.    Defaults to no.
 
     show-uid-validity
           Display the calculated validity of the user IDs on the key
-          that issued the signature. Defaults to no.
+          that issued   the signature. Defaults to no.
 
     show-unusable-uids
           Show revoked and expired user IDs during signature
-          verification.  Defaults to no.
+          verification.    Defaults to no.
 
     show-primary-uid-only
           Show only the primary user ID during signature verification.
-          That is all the AKA lines as well as photo Ids are not shown
-          with the signature verification status.
+          That is   all the AKA lines as well as photo Ids are not
+          shown with the signature   verification status.
 
     pka-lookups
           Enable PKA lookups to verify sender addresses. Note that PKA
-          is based on DNS, and so enabling this option may disclose
-          information on when and what signatures are verified or to
-          whom data is encrypted. This is similar to the "web bug"
-          described for the auto-key-retrieve feature.
+          is based   on DNS, and so enabling this option may disclose
+          information on when   and what signatures are verified or to
+          whom data is encrypted. This   is similar to the "web bug"
+          described for the auto-key-retrieve   feature.
 
     pka-trust-increase
           Raise the trust in a signature to full if the signature
-          passes PKA validation. This option is only meaningful if
+          passes PKA   validation. This option is only meaningful if
           pka-lookups is set.
 
 `--enable-dsa2'
@@ -919,9 +936,11 @@ in the option file.
      exits.  Other flags are "%k" for the key ID, "%K" for the long key
      ID, "%f" for the key fingerprint, "%t" for the extension of the
      image type (e.g. "jpg"), "%T" for the MIME type of the image (e.g.
-     "image/jpeg"), and "%%" for an actual percent sign. If neither %i
-     or %I are present, then the photo will be supplied to the viewer
-     on standard input.
+     "image/jpeg"), "%v" for the single-character calculated validity
+     of the image being viewed (e.g. "f"), "%V" for the calculated
+     validity as a string (e.g.  "full"), and "%%" for an actual
+     percent sign. If neither %i or %I are present, then the photo will
+     be supplied to the viewer on standard input.
 
      The default viewer is "xloadimage -fork -quiet -title 'KeyID 0x%k'
      STDIN". Note that if your image viewer program is not secure, then
@@ -1004,13 +1023,13 @@ in the option file.
           The Latin 2 set.
 
     iso-8859-15
-          This is currently an alias for the Latin 1 set.
+          This is currently an alias for   the Latin 1 set.
 
     koi8-r
           The usual Russian set (rfc1489).
 
     utf-8
-          Bypass all translations and assume that the OS uses native
+          Bypass all translations and assume   that the OS uses native
           UTF-8 encoding.
 
 `--utf8-strings'
@@ -1114,8 +1133,8 @@ in the option file.
 
     pgp
           This is the Web of Trust combined with trust signatures as
-          used in PGP 5.x and later. This is the default trust model
-          when creating a new trust database.
+          used in PGP   5.x and later. This is the default trust model
+          when creating a new   trust database.
 
     classic
           This is the standard Web of Trust as used in PGP 2.x and
@@ -1123,19 +1142,20 @@ in the option file.
 
     direct
           Key validity is set directly by the user and not calculated
-          via the Web of Trust.
+          via the   Web of Trust.
 
     always
           Skip key validation and assume that used keys are always fully
-          trusted. You generally won't use this unless you are using
-          some external validation scheme. This option also suppresses
-          the "[uncertain]" tag printed with signature checks when
-          there is no evidence that the user ID is bound to the key.
+           trusted. You generally won't use this unless you are using
+          some   external validation scheme. This option also
+          suppresses the   "[uncertain]" tag printed with signature
+          checks when there is no   evidence that the user ID is bound
+          to the key.
 
     auto
           Select the trust model depending on whatever the internal
-          trust database says. This is the default model if such a
-          database already exists.
+          trust   database says. This is the default model if such a
+          database already   exists.
 
 `--auto-key-locate `parameters''
 `--no-auto-key-locate'
@@ -1153,8 +1173,8 @@ in the option file.
 
     ldap
           Using DNS Service Discovery, check the domain in question for
-          any LDAP keyservers to use.  If this fails, attempt to locate
-          the key using the PGP Universal method of checking
+          any LDAP   keyservers to use.  If this fails, attempt to
+          locate the key using the   PGP Universal method of checking
           `ldap://keys.(thedomain)'.
 
     keyserver
@@ -1163,26 +1183,27 @@ in the option file.
 
     keyserver-URL
           In addition, a keyserver URL as used in the `--keyserver'
-          option may be used here to query that particular keyserver.
+          option   may be used here to query that particular keyserver.
 
     local
           Locate the key using the local keyrings.  This mechanism
-          allows to select the order a local key lookup is done.  Thus
-          using `--auto-key-locate local' is identical to
+          allows to   select the order a local key lookup is done.
+          Thus using   `--auto-key-locate local' is identical to
           `--no-auto-key-locate'.
 
     nodefault
           This flag disables the standard local key lookup, done before
-          any of the mechanisms defined by the `--auto-key-locate' are
-          tried.  The position of this mechanism in the list does not
-          matter.  It is not required if `local' is also used.
+          any of the   mechanisms defined by the `--auto-key-locate'
+          are tried.  The   position of this mechanism in the list does
+          not matter.  It is not   required if `local' is also used.
 
 
 `--keyid-format `short|0xshort|long|0xlong''
      Select how to display key IDs. "short" is the traditional
      8-character key ID. "long" is the more accurate (but less
      convenient) 16-character key ID. Add an "0x" to either to include
-     an "0x" at the beginning of the key ID, as in 0x99242560.
+     an "0x" at the beginning of the key ID, as in 0x99242560.  Note
+     that this option is ignored if the option -with-colons is used.
 
 `--keyserver `name''
      Use `name' as your keyserver. This is the server that
@@ -1214,100 +1235,103 @@ in the option file.
 
     include-revoked
           When searching for a key with `--search-keys', include keys
-          that are marked on the keyserver as revoked. Note that not
-          all keyservers differentiate between revoked and unrevoked
-          keys, and for such keyservers this option is meaningless.
-          Note also that most keyservers do not have cryptographic
-          verification of key revocations, and so turning this option
+          that   are marked on the keyserver as revoked. Note that not
+          all keyservers   differentiate between revoked and unrevoked
+          keys, and for such   keyservers this option is meaningless.
+          Note also that most keyservers do   not have cryptographic
+          verification of key revocations, and so turning   this option
           off may result in skipping keys that are incorrectly marked
           as revoked.
 
     include-disabled
           When searching for a key with `--search-keys', include keys
-          that are marked on the keyserver as disabled. Note that this
-          option is not used with HKP keyservers.
+          that   are marked on the keyserver as disabled. Note that
+          this option is not   used with HKP keyservers.
 
     auto-key-retrieve
           This option enables the automatic retrieving of keys from a
-          keyserver when verifying signatures made by keys that are not
-          on the local keyring.
+          keyserver   when verifying signatures made by keys that are
+          not on the local   keyring.
 
           Note that this option makes a "web bug" like behavior
-          possible.  Keyserver operators can see which keys you
-          request, so by sending you a message signed by a brand new
-          key (which you naturally will not have on your local
-          keyring), the operator can tell both your IP address and the
-          time when you verified the signature.
+          possible.    Keyserver operators can see which keys you
+          request, so by sending you   a message signed by a brand new
+          key (which you naturally will not have   on your local
+          keyring), the operator can tell both your IP address and
+          the time when you verified the signature.
 
     honor-keyserver-url
           When using `--refresh-keys', if the key in question has a
-          preferred keyserver URL, then use that preferred keyserver to
-          refresh the key from. In addition, if auto-key-retrieve is
-          set, and the signature being verified has a preferred
-          keyserver URL, then use that preferred keyserver to fetch the
-          key from. Defaults to yes.
+          preferred   keyserver URL, then use that preferred keyserver
+          to refresh the key   from. In addition, if auto-key-retrieve
+          is set, and the signature   being verified has a preferred
+          keyserver URL, then use that preferred   keyserver to fetch
+          the key from. Defaults to yes.
 
     honor-pka-record
           If auto-key-retrieve is set, and the signature being verified
-          has a PKA record, then use the PKA information to fetch the
-          key. Defaults to yes.
+          has a   PKA record, then use the PKA information to fetch the
+          key. Defaults   to yes.
 
     include-subkeys
           When receiving a key, include subkeys as potential targets.
-          Note that this option is not used with HKP keyservers, as
-          they do not support retrieving keys by subkey id.
+          Note that   this option is not used with HKP keyservers, as
+          they do not support   retrieving keys by subkey id.
 
     use-temp-files
           On most Unix-like platforms, GnuPG communicates with the
-          keyserver helper program via pipes, which is the most
-          efficient method. This option forces GnuPG to use temporary
-          files to communicate. On some platforms (such as Win32 and
+          keyserver   helper program via pipes, which is the most
+          efficient method. This   option forces GnuPG to use temporary
+          files to communicate. On some   platforms (such as Win32 and
           RISC OS), this option is always enabled.
 
     keep-temp-files
           If using `use-temp-files', do not delete the temp files after
-          using them. This option is useful to learn the keyserver
-          communication protocol by reading the temporary files.
+          using   them. This option is useful to learn the keyserver
+          communication   protocol by reading the temporary files.
 
     verbose
           Tell the keyserver helper program to be more verbose. This
-          option can be repeated multiple times to increase the
+          option can   be repeated multiple times to increase the
           verbosity level.
 
     timeout
           Tell the keyserver helper program how long (in seconds) to
-          try and perform a keyserver action before giving up. Note
-          that performing multiple actions at the same time uses this
-          timeout value per action.  For example, when retrieving
-          multiple keys via `--recv-keys', the timeout applies
+          try and   perform a keyserver action before giving up. Note
+          that performing   multiple actions at the same time uses this
+          timeout value per action.    For example, when retrieving
+          multiple keys via `--recv-keys', the   timeout applies
           separately to each key retrieval, and not to the
           `--recv-keys' command as a whole. Defaults to 30 seconds.
 
     http-proxy=`value'
           Set the proxy to use for HTTP and HKP keyservers.  This
-          overrides the "http_proxy" environment variable, if any.
+          overrides the   "http_proxy" environment variable, if any.
 
     max-cert-size
           When retrieving a key via DNS CERT, only accept keys up to
-          this size.  Defaults to 16384 bytes.
+          this size.    Defaults to 16384 bytes.
 
     debug
           Turn on debug output in the keyserver helper program.  Note
-          that the details of debug output depends on which keyserver
-          helper program is being used, and in turn, on any libraries
-          that the keyserver helper program uses internally (libcurl,
+          that the   details of debug output depends on which keyserver
+          helper program is   being used, and in turn, on any libraries
+          that the keyserver helper   program uses internally (libcurl,
           openldap, etc).
 
     check-cert
           Enable certificate checking if the keyserver presents one
-          (for hkps or ldaps).  Defaults to on.
+          (for hkps or   ldaps).  Defaults to on.
 
     ca-cert-file
-          Provide a certificate file to override the system default.
-          Only necessary if check-cert is enabled, and the keyserver is
-          using a certificate that is not present in a system default
-          certificate list.
+          Provide a certificate store to override the system default.
+          Only   necessary if check-cert is enabled, and the keyserver
+          is using a   certificate that is not present in a system
+          default certificate list.
 
+          Note that depending on the SSL library that the keyserver
+          helper is   built with, this may actually be a directory or a
+          file.
 
 `--completes-needed `n''
      Number of completely trusted users to introduce a new key signer
@@ -1521,8 +1545,19 @@ File: gnupg1.info,  Node: GPG Key related Options,  Next: GPG Input and Output, 
      Don't look at the key ID as stored in the message but try all
      secret keys in turn to find the right decryption key. This option
      forces the behaviour as used by anonymous recipients (created by
-     using `--throw-keyids') and might come handy in case where an
-     encrypted message contains a bogus key ID.
+     using `--throw-keyids' or `--hidden-recipient') and might come
+     handy in case where an encrypted message contains a bogus key ID.
+
+`--skip-hidden-recipients'
+`--no-skip-hidden-recipients'
+     During decryption skip all anonymous recipients.  This option
+     helps in the case that people use the hidden recipients feature to
+     hide there own encrypt-to key from others.  If oneself has many
+     secret keys this may lead to a major annoyance because all keys
+     are tried in turn to decrypt soemthing which was not really
+     intended for it.  The drawback of this option is that it is
+     currently not possible to decrypt a message which includes real
+     anonymous recipients.
 
 
 
@@ -1560,35 +1595,36 @@ File: gnupg1.info,  Node: GPG Input and Output,  Next: OpenPGP Options,  Prev: G
 
     import-local-sigs
           Allow importing key signatures marked as "local". This is not
-          generally useful unless a shared keyring scheme is being used.
-          Defaults to no.
+           generally useful unless a shared keyring scheme is being
+          used.    Defaults to no.
 
     repair-pks-subkey-bug
           During import, attempt to repair the damage caused by the PKS
-          keyserver bug (pre version 0.9.6) that mangles keys with
-          multiple subkeys. Note that this cannot completely repair the
-          damaged key as some crucial data is removed by the keyserver,
-          but it does at least give you back one subkey. Defaults to no
-          for regular `--import' and to yes for keyserver `--recv-keys'.
+          keyserver   bug (pre version 0.9.6) that mangles keys with
+          multiple subkeys. Note   that this cannot completely repair
+          the damaged key as some crucial data   is removed by the
+          keyserver, but it does at least give you back one   subkey.
+          Defaults to no for regular `--import' and to yes for
+          keyserver `--recv-keys'.
 
     merge-only
           During import, allow key updates to existing keys, but do not
-          allow any new keys to be imported. Defaults to no.
+          allow   any new keys to be imported. Defaults to no.
 
     import-clean
           After import, compact (remove all signatures except the
           self-signature) any user IDs from the new key that are not
-          usable.  Then, remove any signatures from the new key that
-          are not usable.  This includes signatures that were issued by
-          keys that are not present on the keyring. This option is the
-          same as running the `--edit-key' command "clean" after
+          usable.    Then, remove any signatures from the new key that
+          are not usable.    This includes signatures that were issued
+          by keys that are not present   on the keyring. This option is
+          the same as running the `--edit-key'   command "clean" after
           import. Defaults to no.
 
     import-minimal
           Import the smallest key possible. This removes all signatures
-          except the most recent self-signature on each user ID. This
-          option is the same as running the `--edit-key' command
-          "minimize" after import.  Defaults to no.
+          except   the most recent self-signature on each user ID. This
+          option is the   same as running the `--edit-key' command
+          "minimize" after import.    Defaults to no.
 
 `--export-options `parameters''
      This is a space or comma delimited string that gives options for
@@ -1597,13 +1633,13 @@ File: gnupg1.info,  Node: GPG Input and Output,  Next: OpenPGP Options,  Prev: G
 
     export-local-sigs
           Allow exporting key signatures marked as "local". This is not
-          generally useful unless a shared keyring scheme is being used.
-          Defaults to no.
+           generally useful unless a shared keyring scheme is being
+          used.    Defaults to no.
 
     export-attributes
           Include attribute user IDs (photo IDs) while exporting. This
-          is useful to export keys if they are going to be used by an
-          OpenPGP program that does not accept attribute user IDs.
+          is   useful to export keys if they are going to be used by an
+          OpenPGP   program that does not accept attribute user IDs.
           Defaults to yes.
 
     export-sensitive-revkeys
@@ -1612,25 +1648,25 @@ File: gnupg1.info,  Node: GPG Input and Output,  Next: OpenPGP Options,  Prev: G
 
     export-reset-subkey-passwd
           When using the `--export-secret-subkeys' command, this option
-          resets the passphrases for all exported subkeys to empty.
-          This is useful when the exported subkey is to be used on an
-          unattended machine where a passphrase doesn't necessarily
+          resets   the passphrases for all exported subkeys to empty.
+          This is useful   when the exported subkey is to be used on an
+          unattended machine where   a passphrase doesn't necessarily
           make sense. Defaults to no.
 
     export-clean
           Compact (remove all signatures from) user IDs on the key being
-          exported if the user IDs are not usable. Also, do not export
-          any signatures that are not usable. This includes signatures
-          that were issued by keys that are not present on the keyring.
-          This option is the same as running the `--edit-key' command
-          "clean" before export except that the local copy of the key
-          is not modified. Defaults to no.
+           exported if the user IDs are not usable. Also, do not export
+          any   signatures that are not usable. This includes
+          signatures that were   issued by keys that are not present on
+          the keyring. This option is   the same as running the
+          `--edit-key' command "clean" before export   except that the
+          local copy of the key is not modified. Defaults to   no.
 
     export-minimal
           Export the smallest key possible. This removes all signatures
-          except the most recent self-signature on each user ID. This
-          option is the same as running the `--edit-key' command
-          "minimize" before export except that the local copy of the
+          except the   most recent self-signature on each user ID. This
+          option is the same as   running the `--edit-key' command
+          "minimize" before export except   that the local copy of the
           key is not modified. Defaults to no.
 
 `--with-colons'
@@ -1678,10 +1714,10 @@ File: gnupg1.info,  Node: OpenPGP Options,  Next: GPG Esoteric Options,  Prev: G
      OpenPGP states that an implementation should generate v4 signatures
      but PGP versions 5 through 7 only recognize v4 signatures on key
      material. This option forces v3 signatures for signatures on data.
-     Note that this option implies `--ask-sig-expire',
+     Note that this option implies `--no-ask-sig-expire', and unsets
      `--sig-policy-url', `--sig-notation', and `--sig-keyserver-url',
      as these features cannot be used with v3 signatures.
-     `--no-force-v3-sigs' disables this option.
+     `--no-force-v3-sigs' disables this option.  Defaults to no.
 
 `--force-v4-certs'
 `--no-force-v4-certs'
@@ -1717,7 +1753,7 @@ File: gnupg1.info,  Node: OpenPGP Options,  Next: GPG Esoteric Options,  Prev: G
      GPG will only select an algorithm that is usable by all
      recipients.  The most highly ranked digest algorithm in this list
      is also used when signing without encryption (e.g. `--clearsign'
-     or `--sign'). The default value is SHA-1.
+     or `--sign').
 
 `--personal-compress-preferences `string''
      Set the list of personal compression preferences to `string'.  Use
@@ -1748,11 +1784,11 @@ File: gnupg1.info,  Node: OpenPGP Options,  Next: GPG Esoteric Options,  Prev: G
 
 `--s2k-count `n''
      Specify how many times the passphrase mangling is repeated.  This
-     value may range between 1024 and 65011712 inclusive, and the
-     default is 65536.  Note that not all values in the 1024-65011712
-     range are legal and if an illegal value is selected, GnuPG will
-     round up to the nearest legal value.  This option is only
-     meaningful if `--s2k-mode' is 3.
+     value may range between 1024 and 65011712 inclusive.  The default
+     is inquired from gpg-agent.  Note that not all values in the
+     1024-65011712 range are legal and if an illegal value is selected,
+     GnuPG will round up to the nearest legal value.  This option is
+     only meaningful if `--s2k-mode' is 3.
 
 
 1.2.5 Compliance options
@@ -1848,6 +1884,35 @@ File: gnupg1.info,  Node: GPG Esoteric Options,  Prev: OpenPGP Options,  Up: GPG
 `--interactive'
      Prompt before overwriting any files.
 
+`--debug-level LEVEL'
+     Select the debug level for investigating problems. LEVEL may be a
+     numeric value or by a keyword:
+
+    `none'
+          No debugging at all.  A value of less than 1 may be used
+          instead of   the keyword.
+
+    `basic'
+          Some basic debug messages.  A value between 1 and 2 may be
+          used   instead of the keyword.
+
+    `advanced'
+          More verbose debug messages.  A value between 3 and 5 may be
+          used   instead of the keyword.
+
+    `expert'
+          Even more detailed messages.  A value between 6 and 8 may be
+          used   instead of the keyword.
+
+    `guru'
+          All of the debug messages you can get. A value greater than 8
+          may be   used instead of the keyword.  The creation of hash
+          tracing files is   only enabled if the keyword is used.
+
+     How these messages are mapped to the actual debugging flags is not
+     specified and may change with newer releases of this program. They
+     are however carefully selected to best aid in debugging.
+
 `--debug FLAGS'
      Set debugging flags. All flags are or-ed and FLAGS may be given in
      C syntax (e.g. 0x0042).
@@ -1858,6 +1923,12 @@ File: gnupg1.info,  Node: GPG Esoteric Options,  Prev: OpenPGP Options,  Up: GPG
 `--debug-ccid-driver'
      Enable debug output from the included CCID driver for smartcards.
      Note that this option is only available on some system.
+
+`--faked-system-time EPOCH'
+     This option is only useful for testing; it sets the system time
+     back or forth to EPOCH which is the number of seconds elapsed
+     since the year 1970.  Alternatively EPOCH may be given as a full
+     ISO time string (e.g. "20070924T154812").
 
 `--enable-progress-filter'
      Enable certain PROGRESS status outputs. This option allows
@@ -2118,7 +2189,7 @@ File: gnupg1.info,  Node: GPG Esoteric Options,  Prev: OpenPGP Options,  Up: GPG
 `--ignore-valid-from'
      GnuPG normally does not select and use subkeys created in the
      future.  This option allows the use of such keys and thus exhibits
-     the pre-1.0.7 behaviour. You should not use this option unless you
+     the pre-1.0.7 behaviour. You should not use this option unless
      there is some clock problem. See also `--ignore-time-conflict' for
      timestamp issues with signatures.
 
@@ -2191,10 +2262,7 @@ File: gnupg1.info,  Node: GPG Esoteric Options,  Prev: OpenPGP Options,  Up: GPG
      When making a data signature, prompt for an expiration time. If
      this option is not specified, the expiration time set via
      `--default-sig-expire' is used. `--no-ask-sig-expire' disables
-     this option. Note that by default, `--force-v3-sigs' is set which
-     also disables this option. If you want signature expiration, you
-     must set `--no-force-v3-sigs' as well as turning
-     `--ask-sig-expire' on.
+     this option.
 
 `--default-sig-expire'
      The default expiration time to use for signature expiration. Valid
@@ -2339,11 +2407,11 @@ There are a few configuration files to control certain aspects of
 directory (*note option --homedir::).
 
 `gpg.conf'
-     This is the standard configuration file read by `gpg' on startup.
-     It may contain any valid long option; the leading two dashes may
-     not be entered and the option may not be abbreviated.  This default
-     name may be changed on the command line (*note option --options::).
-     You should backup this file.
+     This is the standard configuration file read by `gpg' on
+     startup.  It may contain any valid long option; the leading two
+     dashes   may not be entered and the option may not be abbreviated.
+     This default   name may be changed on the command line (*note
+     option --options::).    You should backup this file.
 
 
    Note that on larger installations, it is useful to put predefined
@@ -2368,7 +2436,7 @@ They all live in in the current home directory (*note option
 
 `~/.gnupg/trustdb.gpg'
      The trust database.  There is no need to backup this file; it is
-     better to backup the ownertrust values (*note option
+     better   to backup the ownertrust values (*note option
      --export-ownertrust::).
 
 `~/.gnupg/trustdb.gpg.lock'
@@ -2393,17 +2461,17 @@ GNUPGHOME
      If set directory used instead of "~/.gnupg".
 
 GPG_AGENT_INFO
-     Used to locate the gpg-agent.  This is only honored when
-     `--use-agent' is set.  The value consists of 3 colon delimited
-     fields: The first is the path to the Unix Domain Socket, the
-     second the PID of the gpg-agent and the protocol version which
-     should be set to 1. When starting the gpg-agent as described in
-     its documentation, this variable is set to the correct value. The
-     option `--gpg-agent-info' can be used to override it.
+     Used to locate the gpg-agent.      This is only honored when
+     `--use-agent' is set.      The value consists of 3 colon delimited
+     fields: The first is the path   to the Unix Domain Socket, the
+     second the PID of the gpg-agent and the   protocol version which
+     should be set to 1. When starting the gpg-agent   as described in
+     its documentation, this variable is set to the correct   value.
+     The option `--gpg-agent-info' can be used to override it.
 
 PINENTRY_USER_DATA
      This value is passed via gpg-agent to pinentry.  It is useful to
-     convey extra information to a custom pinentry.
+     convey   extra information to a custom pinentry.
 
 COLUMNS
 LINES
@@ -2411,17 +2479,18 @@ LINES
 
 LANGUAGE
      Apart from its use by GNU, it is used in the W32 version to
-     override the language selection done through the Registry.  If
-     used and set to a valid and available language name (LANGID), the
-     file with the translation is loaded from
-     `GPGDIR/gnupg.nls/LANGID.mo'.  Here GPGDIR is the directory out of
-     which the gpg binary has been loaded.  If it can't be loaded the
-     Registry is tried and as last resort the native Windows locale
-     system is used.
+     override the   language selection done through the Registry.  If
+     used and set to a   valid and available language name (LANGID),
+     the file with the   translation is loaded from
+
+     `GPGDIR/gnupg.nls/LANGID.mo'.  Here GPGDIR is the   directory out
+     of which the gpg binary has been loaded.  If it can't be   loaded
+     the Registry is tried and as last resort the native Windows
+     locale system is used.
 
 
 
-File: gnupg1.info,  Node: GPG Examples,  Prev: GPG Configuration,  Up: Invoking GPG
+File: gnupg1.info,  Node: GPG Examples,  Next: Unattended Usage of GPG,  Prev: GPG Configuration,  Up: Invoking GPG
 
 1.4 Examples
 ============
@@ -2509,7 +2578,7 @@ violation of OpenPGP, but rather reduce the available algorithms to a
 BUGS
 ****
 
-On many systems this program should be installed as setuid(root). This
+On older systems this program should be installed as setuid(root). This
 is necessary to lock memory pages. Locking memory pages prevents the
 operating system from writing memory pages (which may contain
 passphrases or other sensitive material) to disk. If you get no warning
@@ -2523,6 +2592,252 @@ writes all memory to disk before going into a low power or even powered
 off mode.  Unless measures are taken in the operating system to protect
 the saved memory, passphrases or other sensitive material may be
 recoverable from it later.
+
+   Before you report a bug you should first search the mailing list
+archives for similar problems and second check whether such a bug has
+already been reported to our bug tracker at http://bugs.gnupg.org .
+
+
+File: gnupg1.info,  Node: Unattended Usage of GPG,  Prev: GPG Examples,  Up: Invoking GPG
+
+1.5 Unattended Usage
+====================
+
+`gpg' is often used as a backend engine by other software.  To help
+with this a machine interface has been defined to have an unambiguous
+way to do this.  The options `--status-fd' and `--batch' are almost
+always required for this.
+
+* Menu:
+
+* Unattended GPG key generation::  Unattended key generation
+
+
+File: gnupg1.info,  Node: Unattended GPG key generation,  Up: Unattended Usage of GPG
+
+1.6 Unattended key generation
+=============================
+
+The command `--gen-key' may be used along with the option `--batch' for
+unattended key generation.  The parameters are either read from stdin
+or given as a file on the command line.  The format of the parameter
+file is as follows:
+
+   * Text only, line length is limited to about 1000 characters.
+
+   * UTF-8 encoding must be used to specify non-ASCII characters.
+
+   * Empty lines are ignored.
+
+   * Leading and trailing while space is ignored.
+
+   * A hash sign as the first non white space character indicates   a
+     comment line.
+
+   * Control statements are indicated by a leading percent sign, the
+     arguments are separated by white space from the keyword.
+
+   * Parameters are specified by a keyword, followed by a colon.
+     Arguments   are separated by white space.
+
+   *   The first parameter must be `Key-Type'; control statements may be
+      placed anywhere.
+
+   *   The order of the parameters does not matter except for `Key-Type'
+      which must be the first parameter.  The parameters are only used
+     for   the generated keyblock (primary and subkeys); parameters
+     from previous   sets are not used.  Some syntactically checks may
+     be performed.
+
+   *   Key generation takes place when either the end of the parameter
+     file   is reached, the next `Key-Type' parameter is encountered or
+     at the   control statement `%commit' is encountered.
+
+Control statements:
+
+%echo TEXT
+     Print TEXT as diagnostic.
+
+%dry-run
+     Suppress actual key generation (useful for syntax checking).
+
+%commit
+     Perform the key generation.  Note that an implicit commit is done
+     at the next Key-Type parameter.
+
+%pubring FILENAME
+%secring FILENAME
+     Do not write the key to the default or commandline given keyring
+     but to FILENAME.  This must be given before the first commit to
+     take place, duplicate specification of the same filename is
+     ignored, the last filename before a commit is used.  The filename
+     is used until a new filename is used (at commit points) and all
+     keys are written to that file. If a new filename is given, this
+     file is created (and overwrites an existing one).  For GnuPG
+     versions prior to 2.1, both control statements must be given. For
+     GnuPG 2.1 and later `%secring' is a no-op.
+
+%ask-passphrase
+%no-ask-passphrase
+     Enable (or disable) a mode where the command `passphrase' is
+     ignored and instead the usual passphrase dialog is used.  This does
+     not make sense for batch key generation; however the unattended key
+     generation feature is also used by GUIs and this feature
+     relinquishes the GUI from implementing its own passphrase entry
+     code.  These are global control statements and affect all future
+     key genrations.
+
+%no-protection
+     Since GnuPG version 2.1 it is not anymore possible to specify a
+     passphrase for unattended key generation.  The passphrase command
+     is simply ignored and `%ask-passpharse' is thus implicitly enabled.
+     Using this option allows the creation of keys without any
+     passphrase protection.  This option is mainly intended for
+     regression tests.
+
+%transient-key
+     If given the keys are created using a faster and a somewhat less
+     secure random number generator.  This option may be used for keys
+     which are only used for a short time and do not require full
+     cryptographic strength.  It takes only effect if used together with
+     the control statement `%no-protection'.
+
+
+General Parameters:
+
+Key-Type: ALGO
+     Starts a new parameter block by giving the type of the primary
+     key. The algorithm must be capable of signing.  This is a required
+     parameter.  ALGO may either be an OpenPGP algorithm number or a
+     string with the algorithm name.  The special value `default' may
+     be used for ALGO to create the default key type; in this case a
+     `Key-Usage' shall not be given and `default' also be used for
+     `Subkey-Type'.
+
+Key-Length: NBITS
+     The requested length of the generated key in bits.  The default is
+     returned by running the command `gpg2 --gpgconf-list'.
+
+Key-Grip: HEXSTRING
+     This is optional and used to generate a CSR or certificate for an
+     already existing key.  Key-Length will be ignored when given.
+
+Key-Usage: USAGE-LIST
+     Space or comma delimited list of key usages.  Allowed values are
+     `encrypt', `sign', and `auth'.  This is used to generate the key
+     flags.  Please make sure that the algorithm is capable of this
+     usage.  Note that OpenPGP requires that all primary keys are
+     capable of certification, so no matter what usage is given here,
+     the `cert' flag will be on.  If no `Key-Usage' is specified and
+     the `Key-Type' is not `default', all allowed usages for that
+     particular algorithm are used; if it is not given but `default' is
+     used the usage will be `sign'.
+
+Subkey-Type: ALGO
+     This generates a secondary key (subkey).  Currently only one subkey
+     can be handled.  See also `Key-Type' above.
+
+Subkey-Length: NBITS
+     Length of the secondary key (subkey) in bits.  The default is
+     returned by running the command `gpg2 --gpgconf-list'".
+
+Subkey-Usage: USAGE-LIST
+     Key usage lists for a subkey; similar to `Key-Usage'.
+
+Passphrase: STRING
+     If you want to specify a passphrase for the secret key, enter it
+     here.	Default is not to use any passphrase.
+
+Name-Real: NAME
+Name-Comment: COMMENT
+Name-Email: EMAIL
+     The three parts of a user name.  Remember to use UTF-8 encoding
+     here.  If you don't give any of them, no user ID is created.
+
+Expire-Date: ISO-DATE|(NUMBER[d|w|m|y])
+     Set the expiration date for the key (and the subkey).  It may
+     either be entered in ISO date format (2000-08-15) or as number of
+     days, weeks, month or years.  The special notation "seconds=N" is
+     also allowed to directly give an Epoch value. Without a letter
+     days are assumed.  Note that there is no check done on the
+     overflow of the type used by OpenPGP for timestamps.  Thus you
+     better make sure that the given value make sense.  Although
+     OpenPGP works with time intervals, GnuPG uses an absolute value
+     internally and thus the last year we can represent is 2105.
+
+Ceation-Date: ISO-DATE
+     Set the creation date of the key as stored in the key information
+     and which is also part of the fingerprint calculation.  Either a
+     date like "1986-04-26" or a full timestamp like "19860426T042640"
+     may be used.  The time is considered to be UTC.  If it is not
+     given the current time is used.
+
+Preferences: STRING
+     Set the cipher, hash, and compression preference values for this
+     key.  This expects the same type of string as the sub-command
+     `setpref' in the `--edit-key' menu.
+
+Revoker: ALGO:FPR [sensitive]
+     Add a designated revoker to the generated key.  Algo is the public
+     key algorithm of the designated revoker (i.e. RSA=1, DSA=17, etc.)
+     FPR is the fingerprint of the designated revoker.  The optional
+     `sensitive' flag marks the designated revoker as sensitive
+     information.  Only v4 keys may be designated revokers.
+
+Keyserver: STRING
+     This is an optional parameter that specifies the preferred
+     keyserver URL for the key.
+
+Handle: STRING
+     This is an optional parameter only used with the status lines
+     KEY_CREATED and KEY_NOT_CREATED.  STRING may be up to 100
+     characters and should not contain spaces.  It is useful for batch
+     key generation to associate a key parameter block with a status
+     line.
+
+
+Here is an example on how to create a key:
+     $ cat >foo <<EOF
+          %echo Generating a basic OpenPGP key
+          Key-Type: DSA
+          Key-Length: 1024
+          Subkey-Type: ELG-E
+          Subkey-Length: 1024
+          Name-Real: Joe Tester
+          Name-Comment: with stupid passphrase
+          Name-Email: joe@foo.bar
+          Expire-Date: 0
+          Passphrase: abc
+          %pubring foo.pub
+          %secring foo.sec
+          # Do a commit here, so that we can later print "done" :-)
+          %commit
+          %echo done
+     EOF
+     $ gpg2 --batch --gen-key foo
+      [...]
+     $ gpg2 --no-default-keyring --secret-keyring ./foo.sec \
+            --keyring ./foo.pub --list-secret-keys
+     /home/wk/work/gnupg-stable/scratch/foo.sec
+     ------------------------------------------
+     sec  1024D/915A878D 2000-03-09 Joe Tester (with stupid passphrase) <joe@foo.bar>
+     ssb  1024g/8F70E2C0 2000-03-09
+
+If you want to create a key with the default algorithms you would use
+these parameters:
+          %echo Generating a default key
+          Key-Type: default
+          Subkey-Type: default
+          Name-Real: Joe Tester
+          Name-Comment: with stupid passphrase
+          Name-Email: joe@foo.bar
+          Expire-Date: 0
+          Passphrase: abc
+          %pubring foo.pub
+          %secring foo.sec
+          # Do a commit here, so that we can later print "done" :-)
+          %commit
+          %echo done
 
 
 File: gnupg1.info,  Node: Specify a User ID,  Next: Copying,  Prev: Invoking GPG,  Up: Top
@@ -2575,9 +2890,10 @@ entire list of ways to specify a key:
           0E12343434343434343434EAB3484343434343434
           0xE12343434343434343434EAB3484343434343434
 
-     (`gpgsm' also accepts colons between each pair of hexadecimal
+     `gpgsm' also accepts colons between each pair of hexadecimal
      digits because this is the de-facto standard on how to present
-     X.509 fingerprints.)
+     X.509 fingerprints.  `gpg' also allows the use of the space
+     separated SHA-1 fingerprint as printed by the key listing commands.
 
    * By exact match on OpenPGP user ID.  This is denoted by a leading
      equal sign. It does not make sense for X.509 certificates.
@@ -3371,40 +3687,102 @@ Option Index
  [index ]
 * Menu:
 
-* --enarmor:                             Operational GPG Commands.
-                                                              (line 304)
+* allow-freeform-uid:                    GPG Esoteric Options.
+                                                              (line 311)
+* allow-multiple-messages:               GPG Esoteric Options.
+                                                              (line 428)
+* allow-non-selfsigned-uid:              GPG Esoteric Options.
+                                                              (line 306)
+* allow-secret-key-import:               GPG Esoteric Options.
+                                                              (line 423)
+* always-trust:                          GPG Esoteric Options.
+                                                              (line 508)
 * armor:                                 GPG Input and Output.
                                                               (line   8)
+* ask-cert-expire:                       GPG Esoteric Options.
+                                                              (line 410)
+* ask-cert-level:                        GPG Configuration Options.
+                                                              (line 322)
+* ask-sig-expire:                        GPG Esoteric Options.
+                                                              (line 396)
+* attribute-fd:                          GPG Esoteric Options.
+                                                              (line  89)
+* attribute-file:                        GPG Esoteric Options.
+                                                              (line  95)
+* auto-check-trustdb:                    GPG Configuration Options.
+                                                              (line 618)
+* auto-key-locate:                       GPG Configuration Options.
+                                                              (line 402)
 * batch:                                 GPG Configuration Options.
                                                               (line  39)
+* bzip2-compress-level:                  GPG Configuration Options.
+                                                              (line 296)
+* bzip2-decompress-lowmem:               GPG Configuration Options.
+                                                              (line 306)
 * card-edit:                             Operational GPG Commands.
                                                               (line 150)
 * card-status:                           Operational GPG Commands.
                                                               (line 156)
+* cert-digest-algo:                      GPG Esoteric Options.
+                                                              (line 225)
+* cert-notation:                         GPG Esoteric Options.
+                                                              (line 117)
+* cert-policy-url:                       GPG Esoteric Options.
+                                                              (line 147)
 * change-pin:                            Operational GPG Commands.
                                                               (line 159)
 * check-sigs:                            Operational GPG Commands.
                                                               (line 127)
 * check-trustdb:                         Operational GPG Commands.
                                                               (line 250)
+* cipher-algo:                           GPG Esoteric Options.
+                                                              (line 185)
 * clearsign:                             Operational GPG Commands.
                                                               (line  17)
+* command-fd:                            GPG Esoteric Options.
+                                                              (line 294)
+* command-file:                          GPG Esoteric Options.
+                                                              (line 301)
+* comment:                               GPG Esoteric Options.
+                                                              (line 100)
+* compliant-needed:                      GPG Configuration Options.
+                                                              (line 577)
+* compress-algo:                         GPG Esoteric Options.
+                                                              (line 202)
+* compress-level:                        GPG Configuration Options.
+                                                              (line 296)
+* ctapi-driver:                          GPG Esoteric Options.
+                                                              (line 503)
+* dearmor:                               Operational GPG Commands.
+                                                              (line 305)
 * debug:                                 GPG Esoteric Options.
+                                                              (line  51)
+* debug-all:                             GPG Esoteric Options.
+                                                              (line  55)
+* debug-ccid-driver:                     GPG Esoteric Options.
+                                                              (line  58)
+* debug-level:                           GPG Esoteric Options.
                                                               (line  22)
 * decrypt:                               Operational GPG Commands.
                                                               (line  52)
 * decrypt-files:                         Operational GPG Commands.
                                                               (line  87)
+* default-cert-expire:                   GPG Esoteric Options.
+                                                              (line 416)
+* default-cert-level:                    GPG Configuration Options.
+                                                              (line 330)
 * default-key:                           GPG Configuration Options.
                                                               (line  10)
 * default-keyserver-url:                 GPG Esoteric Options.
-                                                              (line 424)
+                                                              (line 456)
 * default-preference-list:               GPG Esoteric Options.
-                                                              (line 419)
+                                                              (line 451)
 * default-recipient:                     GPG Configuration Options.
                                                               (line  15)
 * default-recipient-self:                GPG Configuration Options.
                                                               (line  19)
+* default-sig-expire:                    GPG Esoteric Options.
+                                                              (line 402)
 * delete-key:                            Operational GPG Commands.
                                                               (line 164)
 * delete-secret-and-public-key:          Operational GPG Commands.
@@ -3415,188 +3793,357 @@ Option Index
                                                               (line  21)
 * detach-sign:                           Operational GPG Commands.
                                                               (line  27)
+* digest-algo:                           GPG Esoteric Options.
+                                                              (line 194)
+* disable-ccid:                          GPG Configuration Options.
+                                                              (line 237)
+* disable-cipher-algo:                   GPG Esoteric Options.
+                                                              (line 233)
+* disable-dsa2:                          GPG Configuration Options.
+                                                              (line 167)
+* disable-mdc:                           OpenPGP Options.     (line  46)
+* disable-pubkey-algo:                   GPG Esoteric Options.
+                                                              (line 238)
+* display-charset:                       GPG Configuration Options.
+                                                              (line 251)
+* display-charset:iso-8859-1:            GPG Configuration Options.
+                                                              (line 260)
+* display-charset:iso-8859-15:           GPG Configuration Options.
+                                                              (line 266)
+* display-charset:iso-8859-2:            GPG Configuration Options.
+                                                              (line 263)
+* display-charset:koi8-r:                GPG Configuration Options.
+                                                              (line 269)
+* display-charset:utf-8:                 GPG Configuration Options.
+                                                              (line 272)
 * dry-run:                               GPG Esoteric Options.
                                                               (line   8)
 * dump-options:                          General GPG Commands.
                                                               (line  19)
 * edit-key:                              OpenPGP Key Management.
                                                               (line  26)
+* emit-version:                          GPG Esoteric Options.
+                                                              (line 111)
+* enable-dsa2:                           GPG Configuration Options.
+                                                              (line 167)
+* enable-progress-filter:                GPG Esoteric Options.
+                                                              (line  68)
+* enable-special-filenames:              GPG Esoteric Options.
+                                                              (line 438)
 * enarmor:                               Operational GPG Commands.
-                                                              (line 304)
+                                                              (line 305)
 * encrypt:                               Operational GPG Commands.
                                                               (line  31)
 * encrypt-files:                         Operational GPG Commands.
                                                               (line  84)
+* encrypt-to:                            GPG Key related Options.
+                                                              (line  21)
+* escape-from-lines:                     GPG Esoteric Options.
+                                                              (line 263)
+* exec-path:                             GPG Configuration Options.
+                                                              (line 190)
+* exit-on-status-write-error:            GPG Configuration Options.
+                                                              (line 651)
+* expert:                                GPG Configuration Options.
+                                                              (line 709)
 * export:                                Operational GPG Commands.
                                                               (line 178)
+* export-options:                        GPG Input and Output.
+                                                              (line  67)
 * export-ownertrust:                     Operational GPG Commands.
                                                               (line 265)
 * export-secret-keys:                    Operational GPG Commands.
                                                               (line 194)
 * export-secret-subkeys:                 Operational GPG Commands.
                                                               (line 194)
+* faked-system-time:                     GPG Esoteric Options.
+                                                              (line  62)
+* fast-list-mode:                        GPG Esoteric Options.
+                                                              (line 361)
 * fetch-keys:                            Operational GPG Commands.
                                                               (line 235)
 * fingerprint:                           Operational GPG Commands.
                                                               (line 139)
 * fixed-list-mode:                       GPG Input and Output.
-                                                              (line 117)
+                                                              (line 118)
+* for-your-eyes-only:                    GPG Esoteric Options.
+                                                              (line 171)
+* force-mdc:                             OpenPGP Options.     (line  40)
+* force-v3-sigs:                         OpenPGP Options.     (line  25)
+* force-v4-certs:                        OpenPGP Options.     (line  35)
 * gen-key:                               OpenPGP Key Management.
                                                               (line   9)
 * gen-prime:                             Operational GPG Commands.
-                                                              (line 298)
+                                                              (line 299)
 * gen-random:                            Operational GPG Commands.
                                                               (line 292)
 * gen-revoke:                            OpenPGP Key Management.
                                                               (line  17)
 * gnupg:                                 OpenPGP Options.     (line 114)
+* gpg-agent-info:                        GPG Configuration Options.
+                                                              (line 630)
 * gpgconf-list:                          GPG Esoteric Options.
-                                                              (line 437)
+                                                              (line 469)
 * gpgconf-test:                          GPG Esoteric Options.
-                                                              (line 441)
+                                                              (line 473)
+* group:                                 GPG Key related Options.
+                                                              (line  41)
 * help:                                  General GPG Commands.
                                                               (line  12)
+* hidden-encrypt-to:                     GPG Key related Options.
+                                                              (line  29)
 * hidden-recipient:                      GPG Key related Options.
                                                               (line  14)
 * homedir:                               GPG Configuration Options.
-                                                              (line 217)
+                                                              (line 223)
+* ignore-crc-error:                      GPG Esoteric Options.
+                                                              (line 331)
+* ignore-mdc-error:                      GPG Esoteric Options.
+                                                              (line 338)
+* ignore-time-conflict:                  GPG Esoteric Options.
+                                                              (line 317)
+* ignore-valid-from:                     GPG Esoteric Options.
+                                                              (line 324)
 * import:                                Operational GPG Commands.
                                                               (line 204)
+* import-options:                        GPG Input and Output.
+                                                              (line  29)
 * import-ownertrust:                     Operational GPG Commands.
                                                               (line 271)
 * interactive:                           GPG Esoteric Options.
                                                               (line  19)
 * keyedit:addcardkey:                    OpenPGP Key Management.
-                                                              (line 163)
+                                                              (line 166)
 * keyedit:addkey:                        OpenPGP Key Management.
-                                                              (line 160)
+                                                              (line 163)
 * keyedit:addphoto:                      OpenPGP Key Management.
                                                               (line  81)
 * keyedit:addrevoker:                    OpenPGP Key Management.
-                                                              (line 211)
+                                                              (line 215)
 * keyedit:adduid:                        OpenPGP Key Management.
                                                               (line  78)
 * keyedit:bkuptocard:                    OpenPGP Key Management.
-                                                              (line 177)
+                                                              (line 180)
 * keyedit:check:                         OpenPGP Key Management.
                                                               (line  75)
 * keyedit:clean:                         OpenPGP Key Management.
-                                                              (line 223)
+                                                              (line 227)
 * keyedit:cross-certify:                 OpenPGP Key Management.
-                                                              (line 237)
+                                                              (line 241)
 * keyedit:delkey:                        OpenPGP Key Management.
-                                                              (line 188)
+                                                              (line 191)
 * keyedit:delsig:                        OpenPGP Key Management.
                                                               (line  65)
 * keyedit:deluid:                        OpenPGP Key Management.
-                                                              (line  91)
+                                                              (line  92)
 * keyedit:disable:                       OpenPGP Key Management.
-                                                              (line 207)
+                                                              (line 211)
 * keyedit:enable:                        OpenPGP Key Management.
-                                                              (line 207)
+                                                              (line 211)
 * keyedit:expire:                        OpenPGP Key Management.
-                                                              (line 196)
+                                                              (line 200)
 * keyedit:key:                           OpenPGP Key Management.
                                                               (line  35)
 * keyedit:keyserver:                     OpenPGP Key Management.
-                                                              (line 108)
+                                                              (line 110)
 * keyedit:keytocard:                     OpenPGP Key Management.
-                                                              (line 166)
+                                                              (line 169)
 * keyedit:lsign:                         OpenPGP Key Management.
                                                               (line  46)
 * keyedit:minimize:                      OpenPGP Key Management.
-                                                              (line 232)
+                                                              (line 236)
 * keyedit:notation:                      OpenPGP Key Management.
-                                                              (line 115)
+                                                              (line 117)
 * keyedit:nrsign:                        OpenPGP Key Management.
                                                               (line  51)
 * keyedit:passwd:                        OpenPGP Key Management.
-                                                              (line 217)
+                                                              (line 221)
 * keyedit:pref:                          OpenPGP Key Management.
-                                                              (line 123)
+                                                              (line 125)
 * keyedit:primary:                       OpenPGP Key Management.
-                                                              (line 100)
+                                                              (line 101)
 * keyedit:quit:                          OpenPGP Key Management.
-                                                              (line 248)
+                                                              (line 252)
 * keyedit:revkey:                        OpenPGP Key Management.
-                                                              (line 193)
+                                                              (line 197)
 * keyedit:revsig:                        OpenPGP Key Management.
                                                               (line  70)
 * keyedit:revuid:                        OpenPGP Key Management.
-                                                              (line  97)
+                                                              (line  98)
 * keyedit:save:                          OpenPGP Key Management.
-                                                              (line 245)
+                                                              (line 249)
 * keyedit:setpref:                       OpenPGP Key Management.
-                                                              (line 135)
+                                                              (line 138)
 * keyedit:showphoto:                     OpenPGP Key Management.
-                                                              (line  88)
+                                                              (line  89)
 * keyedit:showpref:                      OpenPGP Key Management.
-                                                              (line 127)
+                                                              (line 130)
 * keyedit:sign:                          OpenPGP Key Management.
                                                               (line  39)
 * keyedit:toggle:                        OpenPGP Key Management.
-                                                              (line 220)
+                                                              (line 224)
 * keyedit:trust:                         OpenPGP Key Management.
-                                                              (line 202)
+                                                              (line 206)
 * keyedit:tsign:                         OpenPGP Key Management.
                                                               (line  55)
 * keyedit:uid:                           OpenPGP Key Management.
                                                               (line  31)
+* keyid-format:                          GPG Configuration Options.
+                                                              (line 442)
+* keyring:                               GPG Configuration Options.
+                                                              (line 197)
+* keyserver:                             GPG Configuration Options.
+                                                              (line 449)
+* keyserver-options:                     GPG Configuration Options.
+                                                              (line 469)
+* limit-card-insert-tries:               GPG Configuration Options.
+                                                              (line 660)
 * list-config:                           GPG Esoteric Options.
-                                                              (line 429)
+                                                              (line 461)
 * list-keys:                             Operational GPG Commands.
                                                               (line  92)
+* list-only:                             GPG Esoteric Options.
+                                                              (line  11)
 * list-options:                          GPG Configuration Options.
                                                               (line  59)
+* list-options:show-keyring:             GPG Configuration Options.
+                                                              (line 102)
+* list-options:show-keyserver-urls:      GPG Configuration Options.
+                                                              (line  86)
 * list-options:show-notations:           GPG Configuration Options.
-                                                              (line  78)
+                                                              (line  81)
 * list-options:show-photos:              GPG Configuration Options.
                                                               (line  67)
 * list-options:show-policy-urls:         GPG Configuration Options.
-                                                              (line  72)
+                                                              (line  75)
+* list-options:show-sig-expire:          GPG Configuration Options.
+                                                              (line 106)
+* list-options:show-sig-subpackets:      GPG Configuration Options.
+                                                              (line 110)
 * list-options:show-std-notations:       GPG Configuration Options.
-                                                              (line  78)
+                                                              (line  81)
+* list-options:show-uid-validity:        GPG Configuration Options.
+                                                              (line  90)
+* list-options:show-unusable-subkeys:    GPG Configuration Options.
+                                                              (line  98)
+* list-options:show-unusable-uids:       GPG Configuration Options.
+                                                              (line  94)
 * list-options:show-user-notations:      GPG Configuration Options.
-                                                              (line  78)
+                                                              (line  81)
 * list-packets:                          Operational GPG Commands.
                                                               (line 146)
 * list-secret-keys:                      Operational GPG Commands.
                                                               (line 105)
 * list-sigs:                             Operational GPG Commands.
                                                               (line 111)
+* load-extension:                        GPG Esoteric Options.
+                                                              (line 483)
 * local-user:                            GPG Key related Options.
                                                               (line  63)
+* lock-multiple:                         GPG Configuration Options.
+                                                              (line 640)
+* lock-never:                            GPG Configuration Options.
+                                                              (line 644)
+* lock-once:                             GPG Configuration Options.
+                                                              (line 636)
+* log-file:                              GPG Esoteric Options.
+                                                              (line  85)
+* logger-fd:                             GPG Esoteric Options.
+                                                              (line  81)
 * lsign-key:                             OpenPGP Key Management.
-                                                              (line 283)
+                                                              (line 289)
 * mangle-dos-filenames:                  GPG Configuration Options.
-                                                              (line 308)
+                                                              (line 314)
+* marginals-needed:                      GPG Configuration Options.
+                                                              (line 581)
+* max-cert-depth:                        GPG Configuration Options.
+                                                              (line 585)
 * max-output:                            GPG Input and Output.
                                                               (line  19)
+* min-cert-level:                        GPG Configuration Options.
+                                                              (line 359)
 * multifile:                             Operational GPG Commands.
                                                               (line  73)
 * no:                                    GPG Configuration Options.
                                                               (line  56)
+* no-armor:                              GPG Input and Output.
+                                                              (line  12)
 * no-batch:                              GPG Configuration Options.
                                                               (line  39)
+* no-default-keyring:                    GPG Esoteric Options.
+                                                              (line 346)
 * no-default-recipient:                  GPG Configuration Options.
                                                               (line  25)
+* no-encrypt-to:                         GPG Key related Options.
+                                                              (line  37)
+* no-expensive-trust-checks:             GPG Esoteric Options.
+                                                              (line 443)
+* no-greeting:                           GPG Configuration Options.
+                                                              (line 674)
+* no-groups:                             GPG Key related Options.
+                                                              (line  59)
+* no-literal:                            GPG Esoteric Options.
+                                                              (line 369)
 * no-mangle-dos-filenames:               GPG Configuration Options.
-                                                              (line 308)
+                                                              (line 314)
+* no-mdc-warning:                        GPG Configuration Options.
+                                                              (line 693)
+* no-options:                            GPG Configuration Options.
+                                                              (line 289)
+* no-random-seed-file:                   GPG Configuration Options.
+                                                              (line 668)
+* no-secmem-warning:                     GPG Configuration Options.
+                                                              (line 677)
+* no-sig-cache:                          GPG Configuration Options.
+                                                              (line 599)
+* no-sig-create-check:                   GPG Configuration Options.
+                                                              (line 608)
+* no-skip-hidden-recipients:             GPG Key related Options.
+                                                              (line  75)
 * no-tty:                                GPG Configuration Options.
                                                               (line  48)
 * no-verbose:                            GPG Configuration Options.
                                                               (line  32)
+* not-dash-escaped:                      GPG Esoteric Options.
+                                                              (line 253)
 * openpgp:                               OpenPGP Options.     (line 122)
+* options:                               GPG Configuration Options.
+                                                              (line 284)
 * output:                                GPG Input and Output.
                                                               (line  16)
+* override-session-key:                  GPG Esoteric Options.
+                                                              (line 387)
+* passphrase:                            GPG Esoteric Options.
+                                                              (line 288)
+* passphrase-fd:                         GPG Esoteric Options.
+                                                              (line 275)
+* passphrase-file:                       GPG Esoteric Options.
+                                                              (line 281)
+* passphrase-repeat:                     GPG Esoteric Options.
+                                                              (line 270)
+* pcsc-driver:                           GPG Configuration Options.
+                                                              (line 231)
+* permission-warning:                    GPG Configuration Options.
+                                                              (line 680)
+* personal-cipher-preferences:           OpenPGP Options.     (line  51)
+* personal-compress-preferences:         OpenPGP Options.     (line  70)
+* personal-digest-preferences:           OpenPGP Options.     (line  60)
 * pgp2:                                  OpenPGP Options.     (line 140)
 * pgp6:                                  OpenPGP Options.     (line 153)
 * pgp7:                                  OpenPGP Options.     (line 164)
 * pgp8:                                  OpenPGP Options.     (line 170)
+* photo-viewer:                          GPG Configuration Options.
+                                                              (line 173)
+* preserve-permissions:                  GPG Esoteric Options.
+                                                              (line 446)
+* primary-keyring:                       GPG Configuration Options.
+                                                              (line 211)
 * print-md:                              Operational GPG Commands.
                                                               (line 287)
 * quiet:                                 GPG Configuration Options.
                                                               (line  35)
+* reader-port:                           GPG Configuration Options.
+                                                              (line 243)
 * rebuild-keydb-caches:                  Operational GPG Commands.
                                                               (line 281)
 * recipient:                             GPG Key related Options.
@@ -3605,37 +4152,136 @@ Option Index
                                                               (line 213)
 * refresh-keys:                          Operational GPG Commands.
                                                               (line 217)
+* require-cross-certification:           GPG Configuration Options.
+                                                              (line 702)
+* require-secmem:                        GPG Configuration Options.
+                                                              (line 697)
 * rfc1991:                               OpenPGP Options.     (line 137)
 * rfc2440:                               OpenPGP Options.     (line 133)
 * rfc4880:                               OpenPGP Options.     (line 128)
+* s2k-cipher-algo:                       OpenPGP Options.     (line  80)
+* s2k-count:                             OpenPGP Options.     (line  97)
+* s2k-digest-algo:                       OpenPGP Options.     (line  86)
+* s2k-mode:                              OpenPGP Options.     (line  90)
 * search-keys:                           Operational GPG Commands.
                                                               (line 226)
+* secret-keyring:                        GPG Configuration Options.
+                                                              (line 208)
 * send-keys:                             Operational GPG Commands.
                                                               (line 185)
+* set-filename:                          GPG Esoteric Options.
+                                                              (line 165)
+* set-filesize:                          GPG Esoteric Options.
+                                                              (line 373)
+* set-notation:                          GPG Esoteric Options.
+                                                              (line 117)
+* set-policy-url:                        GPG Esoteric Options.
+                                                              (line 147)
+* show-keyring:                          GPG Esoteric Options.
+                                                              (line 498)
+* show-notation:                         GPG Esoteric Options.
+                                                              (line 512)
+* show-photos:                           GPG Esoteric Options.
+                                                              (line 490)
+* show-policy-url:                       GPG Esoteric Options.
+                                                              (line 520)
+* show-session-key:                      GPG Esoteric Options.
+                                                              (line 377)
+* sig-keyserver-url:                     GPG Esoteric Options.
+                                                              (line 157)
+* sig-notation:                          GPG Esoteric Options.
+                                                              (line 117)
+* sig-policy-url:                        GPG Esoteric Options.
+                                                              (line 147)
 * sign:                                  Operational GPG Commands.
                                                               (line   8)
 * sign-key:                              OpenPGP Key Management.
-                                                              (line 279)
+                                                              (line 285)
+* simple-sk-checksum:                    GPG Configuration Options.
+                                                              (line 588)
+* skip-hidden-recipients:                GPG Key related Options.
+                                                              (line  75)
+* skip-verify:                           GPG Esoteric Options.
+                                                              (line 353)
+* status-fd:                             GPG Esoteric Options.
+                                                              (line  73)
+* status-file:                           GPG Esoteric Options.
+                                                              (line  77)
 * store:                                 Operational GPG Commands.
                                                               (line  48)
 * symmetric:                             Operational GPG Commands.
                                                               (line  39)
+* textmode:                              OpenPGP Options.     (line   8)
+* throw-keyids:                          GPG Esoteric Options.
+                                                              (line 244)
+* trust-mode:always:                     GPG Configuration Options.
+                                                              (line 388)
+* trust-mode:auto:                       GPG Configuration Options.
+                                                              (line 396)
+* trust-mode:classic:                    GPG Configuration Options.
+                                                              (line 380)
+* trust-mode:direct:                     GPG Configuration Options.
+                                                              (line 384)
+* trust-mode:pgp:                        GPG Configuration Options.
+                                                              (line 375)
+* trust-model:                           GPG Configuration Options.
+                                                              (line 372)
+* trustdb-name:                          GPG Configuration Options.
+                                                              (line 216)
+* trusted-key:                           GPG Configuration Options.
+                                                              (line 365)
+* try-all-secrets:                       GPG Key related Options.
+                                                              (line  67)
+* ungroup:                               GPG Key related Options.
+                                                              (line  56)
 * update-trustdb:                        Operational GPG Commands.
                                                               (line 240)
+* use-agent:                             GPG Configuration Options.
+                                                              (line 625)
+* use-embedded-filename:                 GPG Esoteric Options.
+                                                              (line 180)
+* utf8-strings:                          GPG Configuration Options.
+                                                              (line 277)
 * verbose:                               GPG Configuration Options.
                                                               (line  28)
 * verify:                                Operational GPG Commands.
                                                               (line  60)
 * verify-files:                          Operational GPG Commands.
                                                               (line  81)
+* verify-options:                        GPG Configuration Options.
+                                                              (line 118)
+* verify-options:pka-lookups:            GPG Configuration Options.
+                                                              (line 154)
+* verify-options:pka-trust-increase:     GPG Configuration Options.
+                                                              (line 161)
+* verify-options:show-keyserver-urls:    GPG Configuration Options.
+                                                              (line 137)
+* verify-options:show-notations:         GPG Configuration Options.
+                                                              (line 133)
+* verify-options:show-photos:            GPG Configuration Options.
+                                                              (line 123)
+* verify-options:show-policy-urls:       GPG Configuration Options.
+                                                              (line 127)
+* verify-options:show-primary-uid-only:  GPG Configuration Options.
+                                                              (line 149)
+* verify-options:show-std-notations:     GPG Configuration Options.
+                                                              (line 133)
+* verify-options:show-uid-validity:      GPG Configuration Options.
+                                                              (line 141)
+* verify-options:show-unusable-uids:     GPG Configuration Options.
+                                                              (line 145)
+* verify-options:show-user-notations:    GPG Configuration Options.
+                                                              (line 133)
 * version:                               General GPG Commands.
                                                               (line   7)
 * warranty:                              General GPG Commands.
                                                               (line  16)
 * with-colons:                           GPG Input and Output.
-                                                              (line 109)
+                                                              (line 110)
 * with-fingerprint:                      GPG Input and Output.
-                                                              (line 121)
+                                                              (line 122)
+* with-key-data:                         GPG Esoteric Options.
+                                                              (line 357)
 * yes:                                   GPG Configuration Options.
                                                               (line  53)
 
@@ -3656,28 +4302,31 @@ Index
 
 
 Tag Table:
-Node: Top717
-Node: Invoking GPG1762
-Node: GPG Commands2538
-Node: General GPG Commands3369
-Node: Operational GPG Commands4001
-Ref: option --export-ownertrust15970
-Node: OpenPGP Key Management17685
-Node: GPG Options29225
-Node: GPG Configuration Options30455
-Ref: option --homedir38924
-Ref: option --options41475
-Node: GPG Key related Options60707
-Node: GPG Input and Output63706
-Node: OpenPGP Options69115
-Node: GPG Esoteric Options77126
-Ref: GPG Esoteric Options-Footnote-198774
-Node: GPG Configuration98928
-Node: GPG Examples102125
-Node: Specify a User ID106220
-Ref: how-to-specify-a-user-id106369
-Node: Copying111000
-Node: Option Index148633
-Node: Index167339
+Node: Top775
+Node: Invoking GPG1819
+Ref: Invoking GPG-Footnote-12712
+Node: GPG Commands2777
+Node: General GPG Commands3608
+Node: Operational GPG Commands4240
+Ref: option --export-ownertrust16209
+Node: OpenPGP Key Management18006
+Node: GPG Options29871
+Node: GPG Configuration Options31095
+Ref: option --homedir39936
+Ref: option --options42491
+Node: GPG Key related Options62073
+Node: GPG Input and Output65657
+Node: OpenPGP Options71135
+Node: GPG Esoteric Options79164
+Ref: GPG Esoteric Options-Footnote-1101934
+Node: GPG Configuration102088
+Node: GPG Examples105323
+Node: Unattended Usage of GPG109658
+Node: Unattended GPG key generation110098
+Node: Specify a User ID119231
+Ref: how-to-specify-a-user-id119380
+Node: Copying124122
+Node: Option Index161755
+Node: Index203378
 
 End Tag Table

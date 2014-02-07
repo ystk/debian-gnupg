@@ -1,6 +1,6 @@
 /* trustdb.c
  * Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
- *               2008 Free Software Foundation, Inc.
+ *               2008, 2012 Free Software Foundation, Inc.
  *
  * This file is part of GnuPG.
  *
@@ -660,7 +660,8 @@ trustdb_check_or_update(void)
 
 void
 read_trust_options(byte *trust_model,ulong *created,ulong *nextcheck,
-		   byte *marginals,byte *completes,byte *cert_depth)
+		   byte *marginals,byte *completes,byte *cert_depth,
+		   byte *min_cert_level)
 {
   TRUSTREC opts;
 
@@ -680,6 +681,8 @@ read_trust_options(byte *trust_model,ulong *created,ulong *nextcheck,
     *completes=opts.r.ver.completes;
   if(cert_depth)
     *cert_depth=opts.r.ver.cert_depth;
+  if(min_cert_level)
+    *min_cert_level=opts.r.ver.min_cert_level;
 }
 
 /***********************************************
@@ -1045,7 +1048,8 @@ check_trustdb_stale(void)
 
       did_nextcheck = 1;
       scheduled = tdbio_read_nextcheck ();
-      if (scheduled && scheduled <= make_timestamp ())
+      if ((scheduled && scheduled <= make_timestamp ())
+	  || pending_check_trustdb)
         {
           if (opt.no_auto_check_trustdb) 
             {
@@ -1182,6 +1186,9 @@ get_validity_info (PKT_public_key *pk, PKT_user_id *uid)
 {
     int trustlevel;
 
+    if (!pk)
+      return '?';  /* Just in case a NULL PK is passed.  */
+
     trustlevel = get_validity (pk, uid);
     if( trustlevel & TRUST_FLAG_REVOKED )
 	return 'r';
@@ -1192,6 +1199,9 @@ const char *
 get_validity_string (PKT_public_key *pk, PKT_user_id *uid)
 {
   int trustlevel;
+
+  if (!pk)
+    return "err";  /* Just in case a NULL PK is passed.  */
 
   trustlevel = get_validity (pk, uid);
   if( trustlevel & TRUST_FLAG_REVOKED )
@@ -1651,7 +1661,7 @@ clean_sigs_from_uid(KBNODE keyblock,KBNODE uidnode,int noisy,int self_only)
       /* Everything else we delete */
 
       /* At this point, if 12 is set, the signing key was unavailable.
-	 If 9 or 10 is set, it's superceded.  Otherwise, it's
+	 If 9 or 10 is set, it's superseded.  Otherwise, it's
 	 invalid. */
 
       if(noisy)
@@ -1659,7 +1669,7 @@ clean_sigs_from_uid(KBNODE keyblock,KBNODE uidnode,int noisy,int self_only)
 		 keystr(node->pkt->pkt.signature->keyid),
 		 uidnode->pkt->pkt.user_id->name,
 		 node->flag&(1<<12)?"key unavailable":
-		 node->flag&(1<<9)?"signature superceded":"invalid signature");
+		 node->flag&(1<<9)?"signature superseded":"invalid signature");
 
       delete_kbnode(node);
       deleted++;
@@ -2337,7 +2347,7 @@ validate_keys (int interactive)
 	    {
 	      k->ownertrust = ask_ownertrust (k->kid,min);
 
-	      if (k->ownertrust == -1)
+	      if (k->ownertrust == (unsigned int)(-1))
 		{
 		  quit=1;
 		  goto leave;

@@ -207,6 +207,9 @@ get_manufacturer (unsigned int no)
     case 0x0005: return "ZeitControl";
 
     case 0x002A: return "Magrathea";
+
+    case 0xF517: return "FSIJ";
+
       /* 0x00000 and 0xFFFF are defined as test cards per spec,
          0xFFF00 to 0xFFFE are assigned for use with randomly created
          serial numbers.  */
@@ -948,7 +951,7 @@ change_cert (const char *args)
     }
   else
     {
-      tty_printf ("usage error: redirectrion to file required\n");
+      tty_printf ("usage error: redirection to file required\n");
       return -1;
     }
 
@@ -977,7 +980,7 @@ read_cert (const char *args)
     }
   else
     {
-      tty_printf ("usage error: redirectrion to file required\n");
+      tty_printf ("usage error: redirection to file required\n");
       return -1;
     }
 
@@ -1817,7 +1820,7 @@ card_edit (strlist_t commands)
 	    if (!have_commands)
               {
 		tty_enable_completion (card_edit_completion);
-		answer = cpr_get_no_help("cardedit.prompt", _("Command> "));
+		answer = cpr_get_no_help("cardedit.prompt", _("gpg/card> "));
 		cpr_kill_prompt();
 		tty_disable_completion ();
               }

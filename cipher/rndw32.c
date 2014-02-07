@@ -477,6 +477,17 @@ slow_gatherer_windowsNT( void (*add)(const void*, size_t, int), int requester )
      * worst-case estimate which is usually nowhere near the actual amount
      * required.  For example it may report that 128K of memory is required,
      * but only return 64K of data */
+    if (getenv("GNUPG_RNDW32_NOPERF"))
+      {
+        static int shown;
+        
+        if (!shown)
+          {
+            shown = 1;
+            g10_log_info ("note: get performance data has been disabled\n");
+          }
+      }
+    else
     {	pPerfData =  xmalloc (cbPerfData);
 	for (;;) {
 	    dwSize = cbPerfData;
@@ -523,7 +534,7 @@ rndw32_gather_random (void (*add)(const void*, size_t, int), int requester,
     if( !level )
 	return 0;
     /* We don't differentiate between level 1 and 2 here because
-     * there is no nternal entropy pool as a scary resource.  It may
+     * there is no internal entropy pool as a scarce resource. It may
      * all work slower, but because our entropy source will never
      * block but deliver some not easy to measure entropy, we assume level 2
      */

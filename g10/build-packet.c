@@ -313,7 +313,7 @@ do_secret_key( IOBUF out, int ctb, PKT_secret_key *sk )
                    private/experimental extension (this is not
                    specified in rfc2440 but the same scheme is used
                    for all other algorithm identifiers) */
-		iobuf_put(a, 101 ); 
+		iobuf_put(a, 101 );
 		iobuf_put(a, sk->protect.s2k.hash_algo );
 		iobuf_write(a, "GNU", 3 );
 		iobuf_put(a, sk->protect.s2k.mode - 1000 );
@@ -326,10 +326,10 @@ do_secret_key( IOBUF out, int ctb, PKT_secret_key *sk )
 		|| sk->protect.s2k.mode == 3 )
 		iobuf_write(a, sk->protect.s2k.salt, 8 );
 	    if( sk->protect.s2k.mode == 3 )
-		iobuf_put(a, sk->protect.s2k.count ); 
+		iobuf_put(a, sk->protect.s2k.count );
 
             /* For out special modes 1001, 1002 we do not need an IV */
-	    if( sk->protect.s2k.mode != 1001 
+	    if( sk->protect.s2k.mode != 1001
               && sk->protect.s2k.mode != 1002 )
 		iobuf_write(a, sk->protect.iv, sk->protect.ivlen );
 	}
@@ -338,9 +338,9 @@ do_secret_key( IOBUF out, int ctb, PKT_secret_key *sk )
 	iobuf_put(a, 0 );
 
     if( sk->protect.s2k.mode == 1001 )
-        ; /* GnuPG extension - don't write a secret key at all */ 
+        ; /* GnuPG extension - don't write a secret key at all */
     else if( sk->protect.s2k.mode == 1002 )
-      {  /* GnuPG extension - divert to OpenPGP smartcard. */ 
+      {  /* GnuPG extension - divert to OpenPGP smartcard. */
 	iobuf_put(a, sk->protect.ivlen ); /* length of the serial
                                              number or 0 for no serial
                                              number. */
@@ -491,9 +491,14 @@ do_plaintext( IOBUF out, int ctb, PKT_plaintext *pt )
     wipememory(buf,1000); /* burn the buffer */
     if( (ctb&0x40) && !pt->len )
       iobuf_set_partial_block_mode(out, 0 ); /* turn off partial */
+
+    /* On VMS, byte counts will not match for some file record
+     * formats, so it's best to disable the following error.  */
+#ifndef __VMS
     if( pt->len && n != pt->len )
       log_error("do_plaintext(): wrote %lu bytes but expected %lu bytes\n",
 		(ulong)n, (ulong)pt->len );
+#endif
 
     return rc;
 }
@@ -594,7 +599,7 @@ delete_sig_subpkt (subpktarea_t *area, sigsubpkttype_t reqtype )
 	}
 	if( buflen < n )
 	    break;
-        
+
 	type = *buffer & 0x7f;
 	if( type == reqtype ) {
 	    buffer++;
@@ -628,7 +633,7 @@ delete_sig_subpkt (subpktarea_t *area, sigsubpkttype_t reqtype )
  * Note: All pointers into sig->[un]hashed (e.g. returned by
  * parse_sig_subpkt) are not valid after a call to this function.  The
  * data to put into the subpaket should be in a buffer with a length
- * of buflen. 
+ * of buflen.
  */
 void
 build_sig_subpkt (PKT_signature *sig, sigsubpkttype_t type,
@@ -731,7 +736,7 @@ build_sig_subpkt (PKT_signature *sig, sigsubpkttype_t type,
       case SIGSUBPKT_SIGNATURE:
         hashed = 0;
         break;
-      default: 
+      default:
         hashed = 1;
         break;
       }
@@ -782,7 +787,7 @@ build_sig_subpkt (PKT_signature *sig, sigsubpkttype_t type,
 	memcpy (p, buffer, buflen);
     }
 
-    if (hashed) 
+    if (hashed)
 	sig->hashed = newarea;
     else
 	sig->unhashed = newarea;
@@ -1191,6 +1196,8 @@ write_header( IOBUF out, int ctb, u32 len )
 static int
 write_sign_packet_header( IOBUF out, int ctb, u32 len )
 {
+    (void)ctb;
+
     /* work around a bug in the pgp read function for signature packets,
      * which are not correctly coded and silently assume at some
      * point 2 byte length headers.*/
@@ -1300,6 +1307,8 @@ write_new_header( IOBUF out, int ctb, u32 len, int hdrlen )
 static int
 write_version( IOBUF out, int ctb )
 {
+    (void)ctb;
+
     if( iobuf_put( out, 3 ) )
 	return -1;
     return 0;
