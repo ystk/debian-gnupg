@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- * $Id: app-openpgp.c 5136 2009-09-02 17:30:53Z wk $
+ * $Id$
  */
 
 /* Some notes:
@@ -3598,7 +3598,7 @@ parse_algorithm_attribute (app_t app, int keyno)
   unsigned char *buffer;
   size_t buflen;
   void *relptr;
-  const char const desc[3][5] = {"sign", "encr", "auth"};
+  const char desc[3][5] = {"sign", "encr", "auth"};
 
   assert (keyno >=0 && keyno <= 2);
 

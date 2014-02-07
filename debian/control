@@ -3,19 +3,21 @@ Section: utils
 Priority: important
 Maintainer: Debian GnuPG-Maintainers <pkg-gnupg-maint@lists.alioth.debian.org>
 Uploaders: Sune Vuorela <debian@pusling.com>,
- Daniel Leidert (dale) <daniel.leidert@wgdd.de>,
+ Daniel Leidert <dleidert@debian.org>,
  Thijs Kinkhorst <thijs@debian.org>
-Standards-Version: 3.8.4
+Standards-Version: 3.9.3
 Build-Depends: debhelper (>> 7), libz-dev, libldap2-dev, libbz2-dev,
  libusb-dev [!hurd-i386],
- libreadline-dev, file, gettext, dpatch,
+ libreadline-dev, file, gettext, 
  libcurl4-gnutls-dev
+Build-Depends-Indep: mingw-w64
 Homepage: http://www.gnupg.org
 Vcs-Browser: http://svn.debian.org/wsvn/pkg-gnupg/gnupg/
 Vcs-Svn: svn://svn.debian.org/svn/pkg-gnupg/gnupg/trunk/
 
 Package: gnupg
 Architecture: any
+Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${misc:Depends}, gpgv
 Recommends: ${shlibs:Recommends}, gnupg-curl
 Suggests: gnupg-doc, xloadimage | imagemagick | eog, libpcsclite1
@@ -23,7 +25,7 @@ Description: GNU privacy guard - a free PGP replacement
  GnuPG is GNU's tool for secure communication and data storage.
  It can be used to encrypt data and to create digital signatures.
  It includes an advanced key management facility and is compliant
- with the proposed OpenPGP Internet standard as described in RFC2440.
+ with the proposed OpenPGP Internet standard as described in RFC 4880.
  .
  GnuPG 1.4 is the standalone, non-modularized series. In contrast to
  the version 2 series, shipped with the gnupg2 package, it comes
@@ -41,12 +43,13 @@ Description: GNU privacy guard - a free PGP replacement
 Package: gnupg-curl
 Priority: optional
 Architecture: any
+Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${shlibs:Recommends}, ${misc:Depends}, gnupg
 Description: GNU privacy guard - a free PGP replacement (cURL)
  GnuPG is GNU's tool for secure communication and data storage.
  It can be used to encrypt data and to create digital signatures.
  It includes an advanced key management facility and is compliant
- with the proposed OpenPGP Internet standard as described in RFC2440.
+ with the proposed OpenPGP Internet standard as described in RFC 4880.
  .
  This package contains the keyserver helper tools built with libcurl,
  which replace the ones in the gnupg package built with the "curl shim"
@@ -58,6 +61,7 @@ Description: GNU privacy guard - a free PGP replacement (cURL)
 
 Package: gpgv
 Architecture: any
+Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: gnupg
 Description: GNU privacy guard - signature verification tool
@@ -69,7 +73,7 @@ Description: GNU privacy guard - signature verification tool
  make the signature are trustworthy.
 
 Package: gnupg-udeb
-XC-Package-Type: udeb
+Package-Type: udeb
 Section: debian-installer
 Priority: extra
 Architecture: any
@@ -78,12 +82,12 @@ Description: GNU privacy guard - a free PGP replacement
  GnuPG is GNU's tool for secure communication and data storage.
  It can be used to encrypt data and to create digital signatures.
  It includes an advanced key management facility and is compliant
- with the proposed OpenPGP Internet standard as described in RFC2440.
+ with the proposed OpenPGP Internet standard as described in RFC 4880.
  .
  This is GnuPG packaged in minimal form for use in debian-installer.
 
 Package: gpgv-udeb
-XC-Package-Type: udeb
+Package-Type: udeb
 Section: debian-installer
 Priority: extra
 Architecture: any
@@ -92,7 +96,23 @@ Description: minimal signature verification tool
  GnuPG is GNU's tool for secure communication and data storage.
  It can be used to encrypt data and to create digital signatures.
  It includes an advanced key management facility and is compliant
- with the proposed OpenPGP Internet standard as described in RFC2440.
+ with the proposed OpenPGP Internet standard as described in RFC 4880.
  .
  This is GnuPG's signature verification tool, gpgv, packaged in minimal
  form for use in debian-installer.
+
+Package: gpgv-win32
+Architecture: all
+Priority: extra
+Depends: ${misc:Depends}
+Suggests: wine
+Description: GNU privacy guard - signature verification tool (win32 build)
+ GnuPG is GNU's tool for secure communication and data storage.
+ .
+ gpgv is a stripped-down version of gnupg which is only able to check
+ signatures.  It is smaller than the full-blown gnupg and uses a
+ different (and simpler) way to check that the public keys used to
+ make the signature are trustworthy.
+ .
+ This is a win32 version of gpgv.  It's meant to be used by the win32-loader
+ component of Debian-Installer.

@@ -2,7 +2,7 @@
    Note: I added some stuff for use with gnupg
 
 Copyright (C) 1991, 1992, 1993, 1994, 1996, 1998,
-              2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+              2000, 2001, 2002, 2003, 2011 Free Software Foundation, Inc.
 
 This file is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -180,7 +180,7 @@ extern UDItype __udiv_qrnnd ();
 /***************************************
  **************  ARM  ******************
  ***************************************/
-#if defined (__arm__) && W_TYPE_SIZE == 32
+#if defined (__arm__) && W_TYPE_SIZE == 32 && !defined (__thumb__)
 #define add_ssaaaa(sh, sl, ah, al, bh, bl) \
   __asm__ ("adds %1, %4, %5\n"                                          \
 	   "adc  %0, %2, %3"                                            \
@@ -710,8 +710,16 @@ extern USItype __udiv_qrnnd ();
  **************  MIPS  *****************
  ***************************************/
 #if defined (__mips__) && W_TYPE_SIZE == 32
-#if __GNUC__ > 2 || __GNUC_MINOR__ >= 7
+#if (__GNUC__ >= 5) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
 #define umul_ppmm(w1, w0, u, v) \
+  do {                                                                  \
+    UDItype _r;                                                         \
+    _r = (UDItype) u * v;                                               \
+    (w1) = _r >> 32;                                                    \
+    (w0) = (USItype) _r;                                                \
+  } while (0)
+#elif __GNUC__ > 2 || __GNUC_MINOR__ >= 7
+#define umul_ppmm(w1, w0, u, v)                                         \
   __asm__ ("multu %2,%3"                                                \
 	   : "=l" ((USItype)(w0)),                                      \
 	     "=h" ((USItype)(w1))                                       \
@@ -720,8 +728,8 @@ extern USItype __udiv_qrnnd ();
 #else
 #define umul_ppmm(w1, w0, u, v) \
   __asm__ ("multu %2,%3 \n" \
-	   "mflo %0 \n"     \
-	   "mfhi %1"                                                        \
+	   "mflo %0 \n"                                                 \
+	   "mfhi %1"                                                    \
 	   : "=d" ((USItype)(w0)),                                      \
 	     "=d" ((USItype)(w1))                                       \
 	   : "d" ((USItype)(u)),                                        \
@@ -735,25 +743,34 @@ extern USItype __udiv_qrnnd ();
  **************  MIPS/64  **************
  ***************************************/
 #if (defined (__mips) && __mips >= 3) && W_TYPE_SIZE == 64
-#if __GNUC__ > 2 || __GNUC_MINOR__ >= 7
-#define umul_ppmm(w1, w0, u, v) \
-  __asm__ ("dmultu %2,%3"                                               \
-	   : "=l" ((UDItype)(w0)),                                      \
-	     "=h" ((UDItype)(w1))                                       \
-	   : "d" ((UDItype)(u)),                                        \
-	     "d" ((UDItype)(v)))
-#else
-#define umul_ppmm(w1, w0, u, v) \
-  __asm__ ("dmultu %2,%3 \n"    \
-	   "mflo %0 \n"         \
-	   "mfhi %1"                                                        \
-	   : "=d" ((UDItype)(w0)),                                      \
-	     "=d" ((UDItype)(w1))                                       \
-	   : "d" ((UDItype)(u)),                                        \
-	     "d" ((UDItype)(v)))
-#endif
-#define UMUL_TIME 20
-#define UDIV_TIME 140
+# if (__GNUC__ >= 5) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
+   typedef unsigned int UTItype __attribute__ ((mode (TI)));
+#  define umul_ppmm(w1, w0, u, v)                                       \
+  do {                                                                  \
+    UTItype _r;                                                         \
+    _r = (UTItype) u * v;                                               \
+    (w1) = _r >> 64;                                                    \
+    (w0) = (UDItype) _r;                                                \
+  } while (0)
+# elif if __GNUC__ > 2 || __GNUC_MINOR__ >= 7
+#  define umul_ppmm(w1, w0, u, v)                                       \
+     __asm__ ("dmultu %2,%3"                                            \
+              : "=l" ((UDItype)(w0)),                                   \
+                "=h" ((UDItype)(w1))                                    \
+              : "d" ((UDItype)(u)),                                     \
+                "d" ((UDItype)(v)))
+# else
+#  define umul_ppmm(w1, w0, u, v) \
+     __asm__ ("dmultu %2,%3 \n"    \
+              "mflo %0 \n"                                              \
+              "mfhi %1"                                                 \
+              : "=d" ((UDItype)(w0)),                                   \
+              "=d" ((UDItype)(w1))                                      \
+              : "d" ((UDItype)(u)),                                     \
+              "d" ((UDItype)(v)))
+# endif
+# define UMUL_TIME 20
+# define UDIV_TIME 140
 #endif /* __mips__ */
 
 

@@ -1,3 +1,129 @@
+gnupg (1.4.12-7+deb7u2) wheezy-security; urgency=high
+
+  * Apply upstream patch to fix infinite recursion in the
+    compressed packet parser (CVE-2013-4402, closes: #725439).
+  * Apply upstream patch to fix treating no-usage-permitted
+    keys as all-usages-permitted (CVE-2013-4351, closes: #722722).
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Wed, 09 Oct 2013 17:26:36 +0200
+
+gnupg (1.4.12-7+deb7u1) wheezy-security; urgency=high
+
+  * Apply upstream patch to fix side channel attack on RSA
+    (CVE-2013-4242, closes: #717880).
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Sun, 28 Jul 2013 12:58:25 +0200
+
+gnupg (1.4.12-7) unstable; urgency=high
+
+  * Apply upstream patch to fix memory and key database corruption
+    when importing with invalid keys (CVE-2012-6085, closes: #697108).
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Wed, 02 Jan 2013 19:48:36 +0100
+
+gnupg (1.4.12-6) unstable; urgency=low
+
+  * debian/patches/685627_french_translation_update.patch: Adjusted.
+    - po/gnupg.pot: Trigger .gmo rebuild by date update (closes: #685627).
+
+ -- Daniel Leidert <dleidert@debian.org>  Sun, 14 Oct 2012 12:11:18 +0200
+
+gnupg (1.4.12-5) unstable; urgency=low
+
+  [ Thijs Kinkhorst ]
+  * Add lintian override for gnupg-curl non-conflict.
+
+  [ Daniel Leidert ]
+  * debian/README.BUGS.Debian: Added note about gpg not returning an error
+    message if junk is given after --edit-key/--send-keys (closes: #630388).
+  * patches/685627_french_translation_update.patch: Added.
+    - po/fr.po: French translation proofread and updated (closes: #685627).
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Mon, 09 Apr 2012 18:44:33 +0200
+
+gnupg (1.4.12-4) unstable; urgency=low
+
+  * Move mingw64 to B-D-I, adjust make targets. This helps debian-ports
+    architectures: mingw64 is not commonly available there.
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Mon, 05 Mar 2012 23:20:34 +0100
+
+gnupg (1.4.12-3) unstable; urgency=low
+
+  * Upload to unstable.
+  * Correct path for gpgv-win32 to /usr/share/win32.
+  * Updated to policy 3.9.3.
+  * Convert to copyright-format 1.0.
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Fri, 24 Feb 2012 09:25:20 +0100
+
+gnupg (1.4.12-2) experimental; urgency=low
+
+  * Move mingw-w64 from build-depends-indep to build-depends,
+    otherwise buildds won't install it (classic mistake).
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Wed, 22 Feb 2012 20:12:47 +0000
+
+gnupg (1.4.12-1) experimental; urgency=low
+
+  * New upstream release.
+    - Documents keyid-format and with-colons combination (LP: #808295).
+    - No longer requires readline for gpgv (closes: #592902).
+    - Fixes man page format error for gpg-zip (closes: #606072).
+    - Fixes gpg manual page (closes: #640140).
+  * As we're now on 0 patches, and dpatch is supposedly obsoleted,
+    take the chance to switch to dpkg-source 3.0 (quilt) format.
+  * Several packaging tweaks to keep Lintian happy.
+  * Mark packages Multi-Arch: foreign. thanks Colin Watson (closes: #649490).
+  * Fix path to README.BUGS.Debian.gz in presubj (closes: #614962).
+  * Add Crypto Stick to udev rules (closes: #648332).
+  * Build win32 package with mingw-w64, thanks Stephen Kitt (closes: #623526).
+  * Enable hardened build flags, thanks Moritz Muehlenhoff (closes: #653480).
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Mon, 20 Feb 2012 21:53:58 +0100
+
+gnupg (1.4.11-3) unstable; urgency=low
+
+  * Install gpg setuid root again on kFreeBSD. We dropped this
+    bit earlier because it's not necessary anymore on Linux, but
+    the kFreeBSD kernel still requires it for secure memory.
+    Thanks Robert Millan for the patch. (Closes: 598471)
+  * Add a gpgv-win32 package, to be used by win32-loader. Patch
+    from Didier Raboud (Closes: #612462).
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Tue, 15 Feb 2011 19:49:51 +0100
+
+gnupg (1.4.11-2) experimental; urgency=low
+
+  * Update standards-version to 3.9.1, no changes needed.
+  * Apply patch based on Werner Koch's work that (again)
+    resolves a build failure on mips(el); issue addressed
+    in 1.4.10-4 was only partly solved upstream.
+  * Add README.Debian with smart card reader info, thanks
+    Jonathan Nieder (Closes: #575763). 
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Sat, 13 Nov 2010 12:37:32 +0100
+
+gnupg (1.4.11-1) experimental; urgency=low
+
+  * New upstream release (Closes: #600587).
+    + Obsoletes all previously existing Debian patches:
+      567580_menu_prompt_reflects_program.dpatch
+      560692_fix_fatal_after_homedir_creation.dpatch
+      489225_catch_expired_primary_key_with_valid_subkey.dpatch
+      fix_infinite_loop_r5264.dpatch
+      567593_improve_info_and_faq.dpatch
+      551709_fix_info_link_entry.dpatch
+      560995_fix_ftbfs_on_sparc64.dpatch
+      mips_gcc4.4.dpatch
+      553175_document_primary_uid_sign.dpatch
+    + No longer ships outdated faq.html.
+
+  * Update references to RFC 2440 into RFC 4880. Thanks
+    Christoph Anton Mitterer (Closes: #592294).
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Tue, 26 Oct 2010 20:14:12 +0200
+
 gnupg (1.4.10-4) unstable; urgency=high
 
   * debian/patches/mips_gcc4.4: added to fix build failure on

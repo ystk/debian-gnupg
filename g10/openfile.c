@@ -98,7 +98,11 @@ overwrite_filep( const char *fname )
 /****************
  * Strip know extensions from iname and return a newly allocated
  * filename.  Return NULL if we can't do that.
+ *
+ * (See vmslib/vms.c for the VMS-specific replacement function,
+ * vms_make_outfile_name())
  */
+#ifndef __VMS
 char *
 make_outfile_name( const char *iname )
 {
@@ -125,6 +129,7 @@ make_outfile_name( const char *iname )
     log_info(_("%s: unknown suffix\n"), iname );
     return NULL;
 }
+#endif /* ndef __VMS */
 
 
 /****************
@@ -243,8 +248,13 @@ open_outfile( const char *iname, int mode, IOBUF *a )
 #endif /* USE_ONLY_8DOT3 */
         {
           buf = xmalloc(strlen(iname)+4+1);
+#ifdef __VMS
+          vms_append_ext (buf, iname,
+                         mode==1 ? "asc" : mode==2 ? "sig" : "gpg");
+#else /*!def __VMS*/
           strcpy(stpcpy(buf,iname), mode==1 ? EXTSEP_S "asc" :
 		                   mode==2 ? EXTSEP_S "sig" : EXTSEP_S "gpg");
+#endif /*!def __VMS*/
         }
       name = buf;
     }
@@ -430,6 +440,15 @@ try_make_homedir( const char *fname )
 					fname,	strerror(errno) );
 	else if( !opt.quiet )
 	    log_info( _("directory `%s' created\n"), fname );
+
+#ifdef __VMS
+       /* Explicitly remove group and world (other) access, which may
+          be allowed by default. */
+       if (chmod (fname, S_IRWXU ))
+         log_fatal ("can't set protection on directory `%s': %s\n",
+                    fname, strerror (errno));
+#endif /*def __VMS*/
+
 	copy_options_file( fname );
 /*  	log_info(_("you have to start GnuPG again, " */
 /*  		   "so it can read the new configuration file\n") ); */

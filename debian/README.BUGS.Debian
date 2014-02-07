@@ -109,4 +109,19 @@ gnupg: Dies with "Ohhhh jeeeee: ... this is a bug".
     Debian #485458 <URL:http://bugs.debian.org/485458>
 
 
- -- Daniel Leidert <daniel.leidert@wgdd.de>, 2009
+gnupg: gpg doesn't print an error if junk is given after --edit-key or
+       --send-key.
+
+    Citing the upstream author in https://bugs.g10code.com/gnupg/issue1090:
+
+      We can't print an error message because that would let gpg treturn with
+      an error code and lead to problems with scripts which assume the current
+      way of doing things.  A warning is possible but Unix tools generally
+      don't do that.
+
+    Debian #567597 <URL:http://bugs.debian.org/567597>
+    Debian #630388 <URL:http://bugs.debian.org/630388>
+    Ubuntu #389694 <URL:http://launchpad.net/bugs/389694>
+
+
+ -- Daniel Leidert <daniel.leidert@wgdd.de>, 2012

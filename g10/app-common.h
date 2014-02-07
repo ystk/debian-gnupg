@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- * $Id: app-common.h 5085 2009-07-21 14:30:13Z wk $
+ * $Id$
  */
 
 #ifndef GNUPG_SCD_APP_COMMON_H

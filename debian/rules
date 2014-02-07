@@ -9,8 +9,6 @@
 # paternity under the Copyright, Designs and Patents Act 1988.)
 # This file may have to be extensively modified
 
-include /usr/share/dpatch/dpatch.make
-
 ################################## variables #################################
 
 #VERSION := $(shell dpkg-parsechangelog | grep ^Version: | cut -d' ' -f2)
@@ -18,13 +16,14 @@ include /usr/share/dpatch/dpatch.make
 DEB_BUILD_GNU_TYPE = $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 DEB_HOST_GNU_TYPE  = $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 DEB_BUILD_ARCH    := $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+DEB_HOST_ARCH_OS  := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 
 CONFARGS  = --prefix=/usr --libexecdir=/usr/lib/ \
             --enable-mailto --with-mailprog=/usr/sbin/sendmail \
             --enable-noexecstack
 
 ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
-CONFARGS += --host=$(DEB_HOST_GNU_TYPE)
+HOSTARG += --host=$(DEB_HOST_GNU_TYPE)
 endif
 
 ifeq ($(DEB_BUILD_ARCH),ppc64)
@@ -32,18 +31,22 @@ CONFARGS += --disable-asm
 endif
 
 LDFLAGS += -Wl,--as-needed
+LDFLAGS += `dpkg-buildflags --get LDFLAGS`
+
+CPPFLAGS_DEF = `dpkg-buildflags --get CPPFLAGS`
+CFLAGS_DEF = `dpkg-buildflags --get CFLAGS`
 
 ################################### configure ################################
 
 build-deb/config.status:
 	dh_testdir
 	(mkdir -p $(@D); cd $(@D); \
-	    ../configure $(CONFARGS) $(HOSTARG) --without-libcurl)
+	    ../configure LDFLAGS="$(LDFLAGS)" CPPFLAGS="$(CPPFLAGS_DEF)" CFLAGS="$(CFLAGS_DEF)" $(CONFARGS) $(HOSTARG) --without-libcurl)
 
 build-deb-curl/config.status:
 	dh_testdir
 	(mkdir -p $(@D); cd $(@D); \
-	    ../configure $(CONFARGS) $(HOSTARG))
+	    ../configure LDFLAGS="$(LDFLAGS)" CPPFLAGS="$(CPPFLAGS_DEF)" CFLAGS="$(CFLAGS_DEF)" $(CONFARGS) $(HOSTARG))
 
 build-udeb/config.status:
 	dh_testdir
@@ -51,9 +54,15 @@ build-udeb/config.status:
 	    ../configure $(CONFARGS) $(HOSTARG) \
 	    --without-bzip2 --without-readline --without-libcurl)
 
+build-win32/config.status:
+	dh_testdir
+	(mkdir -p $(@D); cd $(@D); CFLAGS="-g -Os" \
+	    ../configure $(CONFARGS) --host i686-w64-mingw32 \
+	    --disable-gnupg-iconv --without-bzip2 --without-readline --without-libcurl --disable-ldap)
+
 ##################################### build ##################################
 
-build-deb-stamp: patch-stamp build-deb/config.status
+build-deb-stamp: build-deb/config.status
 	dh_testdir
 	$(MAKE) -C build-deb/
 ifeq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS)))
@@ -61,7 +70,7 @@ ifeq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS)))
 endif
 	touch $@
 
-build-deb-curl-stamp: patch-stamp build-deb-curl/config.status
+build-deb-curl-stamp: build-deb-curl/config.status
 	dh_testdir
 	$(MAKE) -C build-deb-curl/
 ifeq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS)))
@@ -69,21 +78,28 @@ ifeq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS)))
 endif
 	touch $@
 
-build-udeb-stamp: patch-stamp build-udeb/config.status
+build-udeb-stamp: build-udeb/config.status
 	dh_testdir
 	$(MAKE) -C build-udeb/
 	touch $@
 
-build: build-deb-stamp build-deb-curl-stamp build-udeb-stamp
+build-win32-stamp: build-win32/config.status
+	dh_testdir
+	$(MAKE) -C build-win32/
+	touch $@
+
+build: build-arch
+build-arch: build-deb-stamp build-deb-curl-stamp build-udeb-stamp
+build-indep: build-win32-stamp
 
 ##################################### clean ##################################
 
-clean: unpatch
+clean: 
 	dh_testdir
 	dh_testroot
-	rm -rf build-udeb/ build-deb-curl/ build-deb/
+	rm -rf build-udeb/ build-deb-curl/ build-deb/ build-win32/
 	# find . -name \*~ | xargs rm -vf
-	dh_clean build-deb-stamp build-deb-curl-stamp build-udeb-stamp patch-stamp
+	dh_clean build-deb-stamp build-deb-curl-stamp build-udeb-stamp build-win32-stamp
 
 #################################### install #################################
 
@@ -96,8 +112,7 @@ install: build
 	: # Move localized manpages to FHS compliant locations
 	mv debian/gnupg/usr/share/man/man1/gpg.ru.1 debian/gnupg/usr/share/man/ru/man1/gpg.1
 	: # Remove from /usr/share/gnupg what we install into /usr/share/doc/gnupg/
-	$(RM) debian/gnupg/usr/share/gnupg/FAQ \
-	      debian/gnupg/usr/share/gnupg/faq.html
+	$(RM) debian/gnupg/usr/share/gnupg/FAQ 
 	$(RM) debian/gnupg/usr/share/info/dir*
 	find debian/gnupg/ -type d -empty | xargs rmdir
 	$(MAKE) -C build-deb-curl/keyserver install DESTDIR=$(CURDIR)/debian/gnupg-curl
@@ -107,34 +122,47 @@ install: build
 
 #################################### binary ##################################
 
-binary-indep: build install
+binary-indep: build-indep
+	dh_testdir -i
+	dh_testroot -i
+	dh_installchangelogs -i NEWS
+	dh_installdocs -i
+	dh_install -i
+	dh_link -i
+	dh_strip -i
+	dh_compress -i
+	dh_fixperms -i
+	dh_installdeb -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i
+
 binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs NEWS
-	# Do we want to ship these 100 of kB's changelogs?
-	for i in checks cipher doc g10 include keyserver mpi po tools util; do \
-	    install -m 644 $$i/ChangeLog debian/gnupg/usr/share/doc/gnupg/changelog.$$i; \
-	done
-	install -m 644 ChangeLog debian/gnupg/usr/share/doc/gnupg/changelog.toplevel
-	install -m 644 keyserver/ChangeLog debian/gnupg-curl/usr/share/doc/gnupg-curl/changelog.keyserver
-	dh_installdocs
-	dh_installexamples
-	dh_movefiles -pgpgv --sourcedir=debian/gnupg
-	dh_install
-	dh_installinfo doc/gnupg1.info
-	dh_installman
-	dh_installudev
-	if which dh_bugfiles ; then dh_bugfiles ; fi
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-	dh_shlibdeps -X debian/gnupg/usr/lib/gnupg/gpgkeys_ldap -- -dRecommends $(CURDIR)/debian/gnupg/usr/lib/gnupg/gpgkeys_ldap -dDepends
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
+	dh_testdir -a
+	dh_testroot -a
+	dh_installchangelogs -a NEWS ChangeLog
+	dh_installdocs -a
+	dh_installexamples -a
+	dh_movefiles -a -pgpgv --sourcedir=debian/gnupg
+	dh_install -a
+	dh_installinfo -a doc/gnupg1.info
+	dh_installman -a
+	dh_installudev -a
+	if which dh_bugfiles ; then dh_bugfiles -a ; fi
+	dh_link -a
+	dh_strip -a
+	dh_compress -a
+	dh_fixperms -a
+ifeq ($(DEB_HOST_ARCH_OS),kfreebsd)
+	# see http://www.gnupg.org/faq.html#q6.1
+	chown root:root	debian/gnupg/usr/bin/gpg
+	chmod 4755	debian/gnupg/usr/bin/gpg
+endif
+	dh_installdeb -a
+	dh_shlibdeps -a -X debian/gnupg/usr/lib/gnupg/gpgkeys_ldap -- -dRecommends $(CURDIR)/debian/gnupg/usr/lib/gnupg/gpgkeys_ldap -dDepends
+	dh_gencontrol -a
+	dh_md5sums -a
+	dh_builddeb -a
 
 binary: binary-indep binary-arch
 

@@ -38,6 +38,10 @@
 #include "main.h"
 #include "ttyio.h"
 
+#ifdef __VMS
+# include "vms.h"
+#endif /* __VMS */
+
 #ifdef HAVE_DOSISH_SYSTEM
 void init_signals(void) {}
 void pause_on_sigusr(int which) {}
@@ -62,7 +66,7 @@ init_one_signal (int sig, RETSIGTYPE (*handler)(int), int check_ign )
     sigemptyset (&nact.sa_mask);
     nact.sa_flags = 0;
     sigaction ( sig, &nact, NULL);
-#else 
+#else
     RETSIGTYPE (*ohandler)(int);
 
     ohandler = signal (sig, handler);
@@ -110,9 +114,15 @@ got_fatal_signal( int sig )
 #endif
     write(2, " caught ... exiting\n", 20 );
 
+#ifdef __VMS
+    /* 2006-08-10 SMS.
+       Restore terminal echo, if needed, before exiting.  */
+    vms_set_term_echo (-1);
+#endif /* def __VMS */
+
     /* Reset action to default action and raise signal again. */
     init_one_signal (sig, SIG_DFL, 0);
-    remove_lockfiles ();
+    dotlock_remove_lockfiles ();
 #ifdef __riscos__
     riscos_close_fds ();
 #endif /* __riscos__ */
@@ -155,7 +165,7 @@ pause_on_sigusr( int which )
 	sigsuspend( &oldmask );
     caught_sigusr1 = 0;
     sigprocmask( SIG_UNBLOCK, &mask, NULL );
-#else 
+#else
      assert (which == 1);
      sighold (SIGUSR1);
      while (!caught_sigusr1)
