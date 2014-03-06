@@ -1,3 +1,11 @@
+gnupg (1.4.10-4+squeeze4) squeeze-security; urgency=high
+
+  * Fixed the RSA Key Extraction via Low-Bandwidth Acoustic
+    Cryptanalysis attack as described by Genkin, Shamir, and Tromer.
+    See <http://www.cs.tau.ac.il/~tromer/acoustic/>. [CVE-2013-4576]
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Sat, 14 Dec 2013 08:28:15 +0100
+
 gnupg (1.4.10-4+squeeze3) squeeze-security; urgency=high
 
   * Apply upstream patch to fix infinite recursion in the
