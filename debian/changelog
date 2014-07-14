@@ -1,3 +1,12 @@
+gnupg (1.4.10-4+squeeze5) squeeze-lts; urgency=high
+
+  * CVE-2014-4617: Avoid DoS due to garbled compressed data packets.
+    Apply upstream commit to stop a possible DoS using garbled compressed
+    data packets which can be used to put gpg into an infinite loop.
+    (Closes: #752497)
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Mon, 30 Jun 2014 15:41:56 +0200
+
 gnupg (1.4.10-4+squeeze4) squeeze-security; urgency=high
 
   * Fixed the RSA Key Extraction via Low-Bandwidth Acoustic
