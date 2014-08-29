@@ -1,6 +1,6 @@
 /* http.c  -  HTTP protocol handler
  * Copyright (C) 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
- *               2009 Free Software Foundation, Inc.
+ *               2009, 2012 Free Software Foundation, Inc.
  *
  * This file is part of GnuPG.
  *
@@ -69,12 +69,12 @@ static int insert_escapes( byte *buffer, const byte *string,
 					 const byte *special );
 static URI_TUPLE parse_tuple( byte *string );
 static int send_request( HTTP_HD hd, const char *auth, const char *proxy,
-			 const char *srvtag, STRLIST headers);
+			 struct http_srv *srv, STRLIST headers);
 static byte *build_rel_path( PARSED_URI uri );
 static int parse_response( HTTP_HD hd );
 
 static int connect_server( const char *server, ushort port, unsigned int flags,
-			   const char *srvtag );
+			   struct http_srv *srv );
 static int write_server( int sock, const char *data, size_t length );
 
 #ifdef _WIN32
@@ -94,7 +94,7 @@ init_sockets (void)
         return;
 
     if( WSAStartup( 0x0101, &wsdata ) ) {
-        log_error ("error initializing socket library: ec=%d\n", 
+        log_error ("error initializing socket library: ec=%d\n",
                     (int)WSAGetLastError () );
         return;
     }
@@ -150,7 +150,7 @@ make_radix64_string( const byte *data, size_t len )
 int
 http_open( HTTP_HD hd, HTTP_REQ_TYPE reqtype, const char *url,
 	   char *auth, unsigned int flags, const char *proxy,
-	   const char *srvtag, STRLIST headers )
+	   struct http_srv *srv, STRLIST headers )
 {
     int rc;
 
@@ -166,7 +166,7 @@ http_open( HTTP_HD hd, HTTP_REQ_TYPE reqtype, const char *url,
 
     rc = parse_uri( &hd->uri, url );
     if( !rc ) {
-        rc = send_request( hd, auth, proxy, srvtag, headers );
+        rc = send_request( hd, auth, proxy, srv, headers );
 	if( !rc ) {
 	    hd->fp_write = iobuf_sockopen( hd->sock , "w" );
 	    if( hd->fp_write )
@@ -205,7 +205,7 @@ http_wait_response( HTTP_HD hd, unsigned int *ret_status )
     http_start_data( hd ); /* make sure that we are in the data */
 
 #if 0
-    hd->sock = dup( hd->sock ); 
+    hd->sock = dup( hd->sock );
     if( hd->sock == -1 )
 	return G10ERR_GENERAL;
 #endif
@@ -234,12 +234,12 @@ http_wait_response( HTTP_HD hd, unsigned int *ret_status )
 
 int
 http_open_document( HTTP_HD hd, const char *document, char *auth,
-		    unsigned int flags, const char *proxy, const char *srvtag,
+		    unsigned int flags, const char *proxy, struct http_srv *srv,
 		    STRLIST headers )
 {
     int rc;
 
-    rc = http_open(hd, HTTP_REQ_GET, document, auth, flags, proxy, srvtag,
+    rc = http_open(hd, HTTP_REQ_GET, document, auth, flags, proxy, srv,
 		   headers );
     if( rc )
 	return rc;
@@ -523,7 +523,7 @@ parse_tuple( byte *string )
  */
 static int
 send_request( HTTP_HD hd, const char *auth, const char *proxy,
-	      const char *srvtag, STRLIST headers )
+	      struct http_srv *srv, STRLIST headers )
 {
     const byte *server;
     byte *request, *p;
@@ -546,7 +546,7 @@ send_request( HTTP_HD hd, const char *auth, const char *proxy,
 	    return G10ERR_NETWORK;
 	  }
 	hd->sock = connect_server( *uri->host? uri->host : "localhost",
-				   uri->port? uri->port : 80, 0, NULL );
+				   uri->port? uri->port : 80, 0, srv );
 	if(uri->auth)
 	  {
 	    char *x;
@@ -560,7 +560,7 @@ send_request( HTTP_HD hd, const char *auth, const char *proxy,
 	release_parsed_uri( uri );
       }
     else
-      hd->sock = connect_server( server, port, hd->flags, srvtag );
+      hd->sock = connect_server( server, port, hd->flags, srv );
 
     if(auth || hd->uri->auth)
       {
@@ -599,16 +599,18 @@ send_request( HTTP_HD hd, const char *auth, const char *proxy,
 	       authstr?authstr:"",proxy_authstr?proxy_authstr:"" );
     else
       {
-	char portstr[15];
+	char portstr[35];
 
-	if(port!=80)
+	if(port == 80 || (srv && srv->used_server))
+	  *portstr = 0;
+	else
 	  sprintf(portstr,":%u",port);
 
 	sprintf( request, "%s %s%s HTTP/1.0\r\nHost: %s%s\r\n%s",
 		 hd->req_type == HTTP_REQ_GET ? "GET" :
 		 hd->req_type == HTTP_REQ_HEAD? "HEAD":
 		 hd->req_type == HTTP_REQ_POST? "POST": "OOPS",
-		 *p == '/'? "":"/", p, server, (port!=80)?portstr:"",
+		 *p == '/'? "":"/", p, server, portstr,
 		 authstr?authstr:"");
       }
 
@@ -815,10 +817,16 @@ start_server(void)
 
 static int
 connect_server( const char *server, ushort port, unsigned int flags,
-		const char *srvtag )
+		struct http_srv *srv )
 {
-  int sock=-1,srv,srvcount=0,connected=0,hostfound=0;
-  struct srventry *srvlist=NULL;
+  int sock = -1;
+  int srvcount = 0;
+  int connected = 0;
+  int hostfound = 0;
+  int chosen = -1;
+  int fakesrv = 0;
+  struct srventry *srvlist = NULL;
+  int srvindex;
 
 #ifdef _WIN32
   unsigned long inaddr;
@@ -838,9 +846,9 @@ connect_server( const char *server, ushort port, unsigned int flags,
 	  return -1;
 	}
 
-      addr.sin_family=AF_INET; 
+      addr.sin_family=AF_INET;
       addr.sin_port=htons(port);
-      memcpy(&addr.sin_addr,&inaddr,sizeof(inaddr));      
+      memcpy(&addr.sin_addr,&inaddr,sizeof(inaddr));
 
       if(connect(sock,(struct sockaddr *)&addr,sizeof(addr))==0)
 	return sock;
@@ -854,15 +862,15 @@ connect_server( const char *server, ushort port, unsigned int flags,
 
 #ifdef USE_DNS_SRV
   /* Do the SRV thing */
-  if(srvtag)
+  if(srv && srv->srvtag)
     {
       /* We're using SRV, so append the tags */
-      if(1+strlen(srvtag)+6+strlen(server)+1<=MAXDNAME)
+      if(1+strlen(srv->srvtag)+6+strlen(server)+1<=MAXDNAME)
 	{
 	  char srvname[MAXDNAME];
 
 	  strcpy(srvname,"_");
-	  strcat(srvname,srvtag);
+	  strcat(srvname,srv->srvtag);
 	  strcat(srvname,"._tcp.");
 	  strcat(srvname,server);
 	  srvcount=getsrv(srvname,&srvlist);
@@ -880,20 +888,21 @@ connect_server( const char *server, ushort port, unsigned int flags,
       srvlist->port=port;
       strncpy(srvlist->target,server,MAXDNAME);
       srvlist->target[MAXDNAME-1]='\0';
-      srvcount=1;
+      srvcount = 1;
+      fakesrv = 1;
     }
 
 #ifdef HAVE_GETADDRINFO
 
-  for(srv=0;srv<srvcount;srv++)
+  for(srvindex=0;srvindex<srvcount;srvindex++)
     {
       struct addrinfo hints,*res,*ai;
       char portstr[6];
 
-      sprintf(portstr,"%u",srvlist[srv].port);
+      sprintf(portstr,"%u",srvlist[srvindex].port);
       memset(&hints,0,sizeof(hints));
       hints.ai_socktype=SOCK_STREAM;
-      if(getaddrinfo(srvlist[srv].target,portstr,&hints,&res)==0)
+      if(getaddrinfo(srvlist[srvindex].target,portstr,&hints,&res)==0)
 	hostfound=1;
       else
 	continue;
@@ -910,6 +919,7 @@ connect_server( const char *server, ushort port, unsigned int flags,
 	  if(connect(sock,ai->ai_addr,ai->ai_addrlen)==0)
 	    {
 	      connected=1;
+	      chosen = srvindex;
 	      break;
 	    }
 
@@ -924,7 +934,7 @@ connect_server( const char *server, ushort port, unsigned int flags,
 
 #else /* !HAVE_GETADDRINFO */
 
-  for(srv=0;srv<srvcount;srv++)
+  for(srvindex=0; srvindex < srvcount; srvindex++)
     {
       int i=0;
       struct hostent *host=NULL;
@@ -932,7 +942,7 @@ connect_server( const char *server, ushort port, unsigned int flags,
 
       memset(&addr,0,sizeof(addr));
 
-      if((host=gethostbyname(srvlist[srv].target))==NULL)
+      if((host=gethostbyname(srvlist[srvindex].target))==NULL)
 	continue;
 
       hostfound=1;
@@ -946,18 +956,18 @@ connect_server( const char *server, ushort port, unsigned int flags,
       addr.sin_family=host->h_addrtype;
       if(addr.sin_family!=AF_INET)
 	{
-	  log_error("%s: unknown address family\n",srvlist[srv].target);
+	  log_error("%s: unknown address family\n",srvlist[srvindex].target);
 	  return -1;
 	}
 
-      addr.sin_port=htons(srvlist[srv].port);
+      addr.sin_port=htons(srvlist[srvindex].port);
 
       /* Try all A records until one responds. */
       while(host->h_addr_list[i])
 	{
 	  if(host->h_length!=4)
 	    {
-	      log_error("%s: illegal address length\n",srvlist[srv].target);
+	      log_error("%s: illegal address length\n",srvlist[srvindex].target);
 	      return -1;
 	    }
 
@@ -966,6 +976,7 @@ connect_server( const char *server, ushort port, unsigned int flags,
 	  if(connect(sock,(struct sockaddr *)&addr,sizeof(addr))==0)
 	    {
 	      connected=1;
+	      chosen = srvindex;
 	      break;
 	    }
 
@@ -978,6 +989,12 @@ connect_server( const char *server, ushort port, unsigned int flags,
       sock_close(sock);
     }
 #endif /* !HAVE_GETADDRINFO */
+
+  if(!fakesrv && chosen > -1 && srv)
+    {
+      srv->used_server = strdup (srvlist[chosen].target);
+      srv->used_port = srvlist[chosen].port;
+    }
 
   free(srvlist);
 
@@ -1012,7 +1029,7 @@ write_server( int sock, const char *data, size_t length )
 
     nleft = length;
     while( nleft > 0 ) {
-#ifdef _WIN32  
+#ifdef _WIN32
         int nwritten;
 
         nwritten = send (sock, data, nleft, 0);

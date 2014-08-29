@@ -1,6 +1,7 @@
 # configure.ac script for GnuPG
 # Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-#               2008, 2009, 2010, 2012 Free Software Foundation, Inc.
+#               2008, 2009, 2010, 2012, 2013 Free Software Foundation, Inc.
+# Copyright (C) 1998, 2013 Werner Koch
 #
 # This file is part of GnuPG.
 #
@@ -22,31 +23,37 @@
 AC_PREREQ(2.59)
 min_automake_version="1.9.3"
 
-# Remember to change the version number immediately *after* a release.
-# Set my_issvn to "yes" for non-released code.  Remember to run an
-# "svn up" and "autogen.sh --force" right before creating a distribution.
-m4_define([my_version], [1.4.12])
-m4_define([my_issvn], [no])
+# To build a release you need to create a tag with the version number
+# (git tag -s gnupg-1.n.m) and run "./autogen.sh --force".  Please
+# bump the version number immediately *after* the release and do
+# another commit and push so that the git magic is able to work.
+m4_define([mym4_version], [1.4.18])
 
-m4_define([svn_revision], m4_esyscmd([printf "%d" $(svn info 2>/dev/null \
-          | sed -n '/^Revision:/ s/[^0-9]//gp'|head -1)]))
-m4_define([git_revision], m4_esyscmd([git branch -v 2>/dev/null \
-          | awk '/^\* / {printf "%s",$3}']))
-m4_define([my_full_version], [my_version[]m4_if(my_issvn,[yes],
-          [m4_if(git_revision,[],[-svn[]svn_revision],[-git[]git_revision])])])
+# Below is m4 magic to extract and compute the git revision number,
+# the decimalized short revision number, a beta version string and a
+# flag indicating a development version (mym4_isgit).  Note that the
+# m4 processing is done by autoconf and not during the configure run.
+m4_define([mym4_revision],
+          m4_esyscmd([git rev-parse --short HEAD | tr -d '\n\r']))
+m4_define([mym4_revision_dec],
+          m4_esyscmd_s([echo $((0x$(echo ]mym4_revision[|head -c 4)))]))
+m4_define([mym4_betastring],
+          m4_esyscmd_s([git describe --match 'gnupg-1.[0-9].*[0-9]' --long|\
+                        awk -F- '$3!=0{print"-beta"$3}']))
+m4_define([mym4_isgit],m4_if(mym4_betastring,[],[no],[yes]))
+m4_define([mym4_full_version],[mym4_version[]mym4_betastring])
 
-AC_INIT([gnupg],[my_full_version],[http://bugs.gnupg.org])
-# Set development_version to yes if the minor number is odd or you
-# feel that the default check for a development version is not
-# sufficient.
-development_version=no
+AC_INIT([gnupg],[mym4_full_version], [http://bugs.gnupg.org])
+
+
+development_version=mym4_isgit
 
 AC_CONFIG_AUX_DIR(scripts)
 AC_CONFIG_SRCDIR(g10/gpg.c)
 AC_CANONICAL_HOST
 AM_INIT_AUTOMAKE([std-options])
 AB_INIT
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(config.h)
 
 AC_GNU_SOURCE
 
@@ -203,24 +210,6 @@ AC_ARG_ENABLE(idea,
 AC_MSG_RESULT($use_idea)
 if test x"$use_idea" = xyes ; then
    AC_DEFINE(USE_IDEA,1,[Define to include the IDEA cipher])
-
-# We don't need idea but some people claim that they need it for
-# research etc., so we allow to place an idea source code into the
-# cipher directory and statically link it if available, otherwise we
-# link to a stub.  We don't use AC_CHECK_FILE to avoid caching.
-
-   AC_MSG_CHECKING([for idea cipher module])
-   tmp=""
-   if test -f $srcdir/cipher/idea.c; then
-      IDEA_O=idea.o
-      tmp=idea
-   else
-      IDEA_O=idea-stub.o
-      tmp=no
-      try_extensions=yes
-   fi
-   AC_SUBST(IDEA_O)
-   AC_MSG_RESULT($tmp)
 fi
 
 AC_MSG_CHECKING([whether to enable the CAST5 cipher])
@@ -550,8 +539,6 @@ AC_ISC_POSIX
 AC_SYS_LARGEFILE
 AC_PROG_INSTALL
 AC_PROG_AWK
-AC_CHECK_PROG(DOCBOOK_TO_MAN, docbook-to-man, yes, no)
-AM_CONDITIONAL(HAVE_DOCBOOK_TO_MAN, test "$ac_cv_prog_DOCBOOK_TO_MAN" = yes)
 GNUPG_CHECK_USTAR
 
 
@@ -740,7 +727,8 @@ if test x"$use_dns_pka" = xyes || test x"$use_dns_srv" = xyes || test x"$use_dns
     # define in bind 8 for some reason.
 
     if test x"$have_resolver" != xyes ; then
-       AC_MSG_CHECKING([whether I can make the resolver usable with BIND_8_COMPAT])
+       AC_MSG_CHECKING([whether I can make the resolver usable with BIND_8_COMPAT and libresolv])
+       LIBS="$LIBS -lresolv"
        AC_LINK_IFELSE([AC_LANG_PROGRAM([[#define BIND_8_COMPAT
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -869,8 +857,12 @@ AC_SUBST(MPI_OPT_FLAGS)
 
 dnl Checks for libraries.
 
+
+# This is "GNU gnupg" - The project-id script from gettext
+#                       needs to find this string.  Without
+#                       it "make distcheck" may fail.
 AM_PO_SUBDIRS
-AM_GNU_GETTEXT_VERSION([0.16.1])
+AM_GNU_GETTEXT_VERSION([0.18.1])
 if test "$try_gettext" = yes; then
   AM_GNU_GETTEXT(,[need-ngettext])
   # gettext requires some extra checks.  These really should be part of
@@ -938,6 +930,7 @@ fi
 
 AM_CONDITIONAL(ENABLE_CARD_SUPPORT, test "$card_support" = yes)
 AM_CONDITIONAL(ENABLE_AGENT_SUPPORT, test "$agent_support" = yes)
+AM_CONDITIONAL(ENABLE_SELINUX_HACKS, test "$selinux_support" = yes)
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -1034,7 +1027,7 @@ AC_CHECK_FUNCS(strcasecmp strncasecmp ctermid times unsetenv getpwnam getpwuid)
 AC_CHECK_FUNCS(memmove gettimeofday getrusage setrlimit clock_gettime)
 AC_CHECK_FUNCS(atexit raise getpagesize strftime nl_langinfo setlocale)
 AC_CHECK_FUNCS(waitpid wait4 sigaction sigprocmask rand pipe stat getaddrinfo)
-AC_CHECK_FUNCS(fcntl ftruncate)
+AC_CHECK_FUNCS(fcntl ftruncate inet_ntop)
 AC_REPLACE_FUNCS(mkdtemp timegm isascii memrchr strsep)
 
 AC_CHECK_TYPES([struct sigaction, sigset_t],,,[#include <signal.h>])

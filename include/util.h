@@ -49,6 +49,7 @@ typedef struct {
 	 const char *last;
 	 void *aliases;
 	 const void *cur_alias;
+         void *iio_list;
      } internal;	    /* DO NOT CHANGE */
 } ARGPARSE_ARGS;
 
@@ -219,6 +220,7 @@ typedef struct private_membuf_s membuf_t;
 
 void init_membuf (membuf_t *mb, int initiallen);
 void put_membuf  (membuf_t *mb, const void *buf, size_t len);
+void put_membuf_str (membuf_t *mb, const char *buf);
 void *get_membuf (membuf_t *mb, size_t *len);
 
 

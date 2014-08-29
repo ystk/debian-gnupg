@@ -59,14 +59,17 @@ struct stats_s {
 
 
 static int import( IOBUF inp, const char* fname,struct stats_s *stats,
-		   unsigned char **fpr,size_t *fpr_len,unsigned int options );
+		   unsigned char **fpr,size_t *fpr_len,unsigned int options,
+		   import_filter filter, void *filter_arg );
 static int read_block( IOBUF a, PACKET **pending_pkt, KBNODE *ret_root );
 static void revocation_present(KBNODE keyblock);
 static int import_one(const char *fname, KBNODE keyblock,struct stats_s *stats,
 		      unsigned char **fpr,size_t *fpr_len,
-		      unsigned int options,int from_sk);
+		      unsigned int options,int from_sk,
+		      import_filter filter, void *filter_arg);
 static int import_secret_one( const char *fname, KBNODE keyblock,
-                              struct stats_s *stats, unsigned int options);
+                              struct stats_s *stats, unsigned int options,
+                              import_filter filter, void *filter_arg);
 static int import_revoke_cert( const char *fname, KBNODE node,
                                struct stats_s *stats);
 static int chk_self_sigs( const char *fname, KBNODE keyblock,
@@ -163,7 +166,8 @@ import_release_stats_handle (void *p)
 static int
 import_keys_internal( IOBUF inp, char **fnames, int nnames,
 		      void *stats_handle, unsigned char **fpr, size_t *fpr_len,
-		      unsigned int options )
+		      unsigned int options,
+		      import_filter filter, void *filter_arg)
 {
     int i, rc = 0;
     struct stats_s *stats = stats_handle;
@@ -172,7 +176,8 @@ import_keys_internal( IOBUF inp, char **fnames, int nnames,
         stats = import_new_stats_handle ();
 
     if (inp) {
-        rc = import( inp, "[stream]", stats, fpr, fpr_len, options);
+        rc = import (inp, "[stream]", stats, fpr, fpr_len, options,
+                     filter, filter_arg);
     }
     else {
         int once = (!fnames && !nnames);
@@ -192,7 +197,8 @@ import_keys_internal( IOBUF inp, char **fnames, int nnames,
 	        log_error(_("can't open `%s': %s\n"), fname, strerror(errno) );
 	    else
 	      {
-	        rc = import( inp2, fname, stats, fpr, fpr_len, options );
+	        rc = import (inp2, fname, stats, fpr, fpr_len, options,
+                             NULL, NULL);
 	        iobuf_close(inp2);
                 /* Must invalidate that ugly cache to actually close it. */
                 iobuf_ioctl (NULL, 2, 0, (char*)fname);
@@ -223,19 +229,23 @@ void
 import_keys( char **fnames, int nnames,
 	     void *stats_handle, unsigned int options )
 {
-  import_keys_internal(NULL,fnames,nnames,stats_handle,NULL,NULL,options);
+  import_keys_internal (NULL, fnames, nnames, stats_handle, NULL, NULL,
+                        options, NULL, NULL);
 }
 
 int
 import_keys_stream( IOBUF inp, void *stats_handle,
-		    unsigned char **fpr, size_t *fpr_len,unsigned int options )
+		    unsigned char **fpr, size_t *fpr_len,unsigned int options,
+	            import_filter filter, void *filter_arg )
 {
-  return import_keys_internal(inp,NULL,0,stats_handle,fpr,fpr_len,options);
+  return import_keys_internal (inp, NULL, 0, stats_handle, fpr, fpr_len,
+                               options, filter, filter_arg);
 }
 
 static int
 import( IOBUF inp, const char* fname,struct stats_s *stats,
-	unsigned char **fpr,size_t *fpr_len,unsigned int options )
+	unsigned char **fpr,size_t *fpr_len,unsigned int options,
+	import_filter filter, void *filter_arg)
 {
     PACKET *pending_pkt = NULL;
     KBNODE keyblock = NULL;
@@ -252,9 +262,11 @@ import( IOBUF inp, const char* fname,struct stats_s *stats,
 
     while( !(rc = read_block( inp, &pending_pkt, &keyblock) )) {
 	if( keyblock->pkt->pkttype == PKT_PUBLIC_KEY )
-	    rc = import_one( fname, keyblock, stats, fpr, fpr_len, options, 0);
-	else if( keyblock->pkt->pkttype == PKT_SECRET_KEY )
-                rc = import_secret_one( fname, keyblock, stats, options );
+	    rc = import_one (fname, keyblock, stats, fpr, fpr_len, options, 0,
+                             filter, filter_arg);
+        else if( keyblock->pkt->pkttype == PKT_SECRET_KEY )
+            rc = import_secret_one (fname, keyblock, stats, options,
+                                    filter, filter_arg);
 	else if( keyblock->pkt->pkttype == PKT_SIGNATURE
 		 && keyblock->pkt->pkt.signature->sig_class == 0x20 )
 	    rc = import_revoke_cert( fname, keyblock, stats );
@@ -343,6 +355,27 @@ import_print_stats (void *hd)
 }
 
 
+/* Return true if PKTTYPE is valid in a keyblock.  */
+static int
+valid_keyblock_packet (int pkttype)
+{
+  switch (pkttype)
+    {
+    case PKT_PUBLIC_KEY:
+    case PKT_PUBLIC_SUBKEY:
+    case PKT_SECRET_KEY:
+    case PKT_SECRET_SUBKEY:
+    case PKT_SIGNATURE:
+    case PKT_USER_ID:
+    case PKT_ATTRIBUTE:
+    case PKT_RING_TRUST:
+      return 1;
+    default:
+      return 0;
+    }
+}
+
+
 /****************
  * Read the next keyblock from stream A.
  * PENDING_PKT should be initialzed to NULL
@@ -420,7 +453,7 @@ read_block( IOBUF a, PACKET **pending_pkt, KBNODE *ret_root )
 	    }
 	    in_cert = 1;
 	  default:
-	    if( in_cert ) {
+	    if (in_cert && valid_keyblock_packet (pkt->pkttype)) {
 		if( !root )
 		    root = new_kbnode( pkt );
 		else
@@ -717,7 +750,7 @@ check_prefs(KBNODE keyblock)
 static int
 import_one( const char *fname, KBNODE keyblock, struct stats_s *stats,
 	    unsigned char **fpr,size_t *fpr_len,unsigned int options,
-	    int from_sk )
+	    int from_sk, import_filter filter, void *filter_arg)
 {
     PKT_public_key *pk;
     PKT_public_key *pk_orig;
@@ -755,6 +788,13 @@ import_one( const char *fname, KBNODE keyblock, struct stats_s *stats,
       {
 	log_error( _("key %s: no user ID\n"), keystr_from_pk(pk));
 	return 0;
+      }
+
+    if (filter && filter (pk, NULL, filter_arg))
+      {
+        log_error (_("key %s: %s\n"), keystr_from_pk(pk),
+                   _("rejected by import filter"));
+        return 0;
       }
 
     if (opt.interactive) {
@@ -1125,7 +1165,8 @@ sec_to_pub_keyblock(KBNODE sec_keyblock)
  */
 static int
 import_secret_one( const char *fname, KBNODE keyblock,
-                   struct stats_s *stats, unsigned int options)
+                   struct stats_s *stats, unsigned int options,
+                   import_filter filter, void *filter_arg)
 {
     PKT_secret_key *sk;
     KBNODE node, uidnode;
@@ -1141,6 +1182,12 @@ import_secret_one( const char *fname, KBNODE keyblock,
     keyid_from_sk( sk, keyid );
     uidnode = find_next_kbnode( keyblock, PKT_USER_ID );
 
+    if (filter && filter (NULL, sk, filter_arg)) {
+        log_error (_("secret key %s: %s\n"), keystr_from_sk(sk),
+                   _("rejected by import filter"));
+        return 0;
+    }
+
     if( opt.verbose )
       {
 	log_info( "sec  %4u%c/%s %s   ",
@@ -1153,6 +1200,12 @@ import_secret_one( const char *fname, KBNODE keyblock,
 	putc('\n', stderr);
       }
     stats->secret_read++;
+
+    if ((options & IMPORT_NO_SECKEY))
+      {
+        log_error (_("importing secret keys not allowed\n"));
+        return 0;
+      }
 
     if( !uidnode )
       {
@@ -1213,8 +1266,9 @@ import_secret_one( const char *fname, KBNODE keyblock,
 	    KBNODE pub_keyblock=sec_to_pub_keyblock(keyblock);
 	    if(pub_keyblock)
 	      {
-		import_one(fname,pub_keyblock,stats,
-			   NULL,NULL,opt.import_options,1);
+		import_one (fname, pub_keyblock, stats,
+                            NULL, NULL, opt.import_options, 1,
+                            NULL, NULL);
 		release_kbnode(pub_keyblock);
 	      }
 	  }

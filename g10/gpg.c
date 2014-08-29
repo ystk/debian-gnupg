@@ -1,6 +1,7 @@
 /* gpg.c - The GnuPG utility (main for gpg)
  * Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
  *               2007, 2008, 2009, 2010, 2012 Free Software Foundation, Inc.
+ * Copyright (C) 1997, 1998, 2013 Werner Koch
  *
  * This file is part of GnuPG.
  *
@@ -792,8 +793,8 @@ strusage( int level )
 	break;
       case 41:	p =
 	    _("Syntax: gpg [options] [files]\n"
-	      "sign, check, encrypt or decrypt\n"
-	      "default operation depends on the input data\n");
+	      "Sign, check, encrypt or decrypt\n"
+	      "Default operation depends on the input data\n");
 	break;
 
       case 31: p = "\nHome: "; break;
@@ -835,57 +836,53 @@ strusage( int level )
 
 
 static char *
-build_list( const char *text, char letter,
-	    const char * (*mapf)(int), int (*chkf)(int) )
+build_list (const char *text, char letter,
+	    const char * (*mapf)(int), int (*chkf)(int))
 {
-    int i;
-    const char *s;
-    size_t n=strlen(text)+2;
-    char *list, *p, *line=NULL;
+  membuf_t mb;
+  int indent;
+  int i, j, len;
+  const char *s;
+  char *string;
 
-    if( maybe_setuid )
-	secmem_init( 0 );    /* drop setuid */
+  if (maybe_setuid)
+    secmem_init (0);    /* Drop setuid */
 
-    for(i=0; i <= 110; i++ )
-	if( !chkf(i) && (s=mapf(i)) )
-	    n += strlen(s) + 7 + 2;
-    list = xmalloc( 21 + n ); *list = 0;
-    for(p=NULL, i=0; i <= 110; i++ ) {
-	if( !chkf(i) && (s=mapf(i)) ) {
-	    if( !p ) {
-		p = stpcpy( list, text );
-		line=p;
+  indent = strlen (text);
+  len = 0;
+  init_membuf (&mb, 512);
+
+  for (i=0; i <= 110; i++ )
+    {
+      if (!chkf (i) && (s = mapf (i)))
+        {
+          if (mb.len - len > 60)
+            {
+              put_membuf_str (&mb, ",\n");
+              len = mb.len;
+              for (j=0; j < indent; j++)
+                put_membuf_str (&mb, " ");
 	    }
-	    else
-		p = stpcpy( p, ", ");
+          else if (mb.len)
+            put_membuf_str (&mb, ", ");
+          else
+            put_membuf_str (&mb, text);
 
-	    if(strlen(line)>60) {
-	      int spaces=strlen(text);
-
-	      list=xrealloc(list,n+spaces+1);
-	      /* realloc could move the block, so find the end again */
-	      p=list;
-	      while(*p)
-		p++;
-
-	      p=stpcpy(p, "\n");
-	      line=p;
-	      for(;spaces;spaces--)
-		p=stpcpy(p, " ");
-	    }
-
-	    p = stpcpy(p, s );
-	    if(opt.verbose && letter)
-	      {
-		char num[8];
-		sprintf(num," (%c%d)",letter,i);
-		p = stpcpy(p,num);
-	      }
+          put_membuf_str (&mb, s);
+          if (opt.verbose && letter)
+            {
+              char num[20];
+              snprintf (num, sizeof num, " (%c%d)", letter, i);
+              put_membuf_str (&mb, num);
+            }
 	}
     }
-    if( p )
-	p = stpcpy(p, "\n" );
-    return list;
+  if (mb.len)
+    put_membuf_str (&mb, "\n");
+  put_membuf (&mb, "", 1);
+
+  string = get_membuf (&mb, NULL);
+  return xrealloc (string, strlen (string)+1);
 }
 
 
@@ -1134,8 +1131,6 @@ rm_group(char *name)
    directory is group or other writable or not owned by us.  Disable
    exec in this case.
 
-   2) Extensions.  Same as #1.
-
    Returns true if the item is unsafe. */
 static int
 check_permissions(const char *path,int item)
@@ -1152,16 +1147,7 @@ check_permissions(const char *path,int item)
 
   assert(item==0 || item==1 || item==2);
 
-  /* extensions may attach a path */
-  if(item==2 && path[0]!=DIRSEP_C)
-    {
-      if(strchr(path,DIRSEP_C))
-	tmppath=make_filename(path,NULL);
-      else
-	tmppath=make_filename(GNUPG_LIBDIR,path,NULL);
-    }
-  else
-    tmppath=xstrdup(path);
+  tmppath=xstrdup(path);
 
   /* If the item is located in the homedir, but isn't the homedir,
      don't continue if we already checked the homedir itself.  This is
@@ -1218,9 +1204,9 @@ check_permissions(const char *path,int item)
 	  homedir_cache=ret;
 	}
     }
-  else if(item==1 || item==2)
+  else if(item==1)
     {
-      /* The options or extension file.  Okay unless it or its
+      /* The options file.  Okay unless it or its
 	 containing directory is group or other writable or not owned
 	 by us or root. */
 
@@ -1271,48 +1257,36 @@ check_permissions(const char *path,int item)
 	  if(item==0)
 	    log_info(_("WARNING: unsafe ownership on"
 		       " homedir `%s'\n"),tmppath);
-	  else if(item==1)
-	    log_info(_("WARNING: unsafe ownership on"
-		       " configuration file `%s'\n"),tmppath);
 	  else
 	    log_info(_("WARNING: unsafe ownership on"
-		       " extension `%s'\n"),tmppath);
+		       " configuration file `%s'\n"),tmppath);
 	}
       if(perm)
 	{
 	  if(item==0)
 	    log_info(_("WARNING: unsafe permissions on"
 		       " homedir `%s'\n"),tmppath);
-	  else if(item==1)
-	    log_info(_("WARNING: unsafe permissions on"
-		       " configuration file `%s'\n"),tmppath);
 	  else
 	    log_info(_("WARNING: unsafe permissions on"
-		       " extension `%s'\n"),tmppath);
+		       " configuration file `%s'\n"),tmppath);
 	}
       if(enc_dir_own)
 	{
 	  if(item==0)
 	    log_info(_("WARNING: unsafe enclosing directory ownership on"
 		       " homedir `%s'\n"),tmppath);
-	  else if(item==1)
-	    log_info(_("WARNING: unsafe enclosing directory ownership on"
-		       " configuration file `%s'\n"),tmppath);
 	  else
 	    log_info(_("WARNING: unsafe enclosing directory ownership on"
-		       " extension `%s'\n"),tmppath);
+		       " configuration file `%s'\n"),tmppath);
 	}
       if(enc_dir_perm)
 	{
 	  if(item==0)
 	    log_info(_("WARNING: unsafe enclosing directory permissions on"
 		       " homedir `%s'\n"),tmppath);
-	  else if(item==1)
-	    log_info(_("WARNING: unsafe enclosing directory permissions on"
-		       " configuration file `%s'\n"),tmppath);
 	  else
 	    log_info(_("WARNING: unsafe enclosing directory permissions on"
-		       " extension `%s'\n"),tmppath);
+		       " configuration file `%s'\n"),tmppath);
 	}
     }
 
@@ -1935,6 +1909,7 @@ main (int argc, char **argv )
     opt.def_cert_expire="0";
     set_homedir ( default_homedir () );
     opt.passwd_repeat=1;
+    opt.emit_version = 1; /* Limit to the major number.  */
 
 #ifdef ENABLE_CARD_SUPPORT
 #if defined(_WIN32) || defined(__CYGWIN__)
@@ -2272,8 +2247,8 @@ main (int argc, char **argv )
 	  case oNoVerbose: g10_opt_verbose = 0;
 			   opt.verbose = 0; opt.list_sigs=0; break;
 	  case oQuickRandom: quick_random_gen(1); break;
-	  case oEmitVersion: opt.no_version=0; break;
-	  case oNoEmitVersion: opt.no_version=1; break;
+	  case oEmitVersion: opt.emit_version++; break;
+	  case oNoEmitVersion: opt.emit_version=0; break;
 	  case oCompletesNeeded: opt.completes_needed = pargs.r.ret_int; break;
 	  case oMarginalsNeeded: opt.marginals_needed = pargs.r.ret_int; break;
 	  case oMaxCertDepth: opt.max_cert_depth = pargs.r.ret_int; break;
@@ -2318,19 +2293,7 @@ main (int argc, char **argv )
 	      }
 	    break;
 	  case oLoadExtension:
-#ifndef __riscos__
-#if defined(USE_DYNAMIC_LINKING) || defined(_WIN32)
-	    if(check_permissions(pargs.r.ret_str,2))
-	      log_info(_("cipher extension `%s' not loaded due to"
-			 " unsafe permissions\n"),pargs.r.ret_str);
-	    else
-	      register_cipher_extension(orig_argc? *orig_argv:NULL,
-					pargs.r.ret_str);
-#endif
-#else /* __riscos__ */
-            riscos_not_implemented("load-extension");
-#endif /* __riscos__ */
-	    break;
+            break;  /* This is a dummy option since 1.4.13.  */
 	  case oRFC1991:
 	    opt.compliance = CO_RFC1991;
 	    opt.force_v4_certs = 0;
@@ -3037,7 +3000,6 @@ main (int argc, char **argv )
 	      {
 		log_info(_("encrypting a message in --pgp2 mode requires "
 			   "the IDEA cipher\n"));
-		idea_cipher_warn(1);
 		unusable=1;
 	      }
 	    else if(cmd==aSym)
@@ -3097,12 +3059,6 @@ main (int argc, char **argv )
      * may try to load an module */
     if( def_cipher_string ) {
 	opt.def_cipher_algo = string_to_cipher_algo(def_cipher_string);
-	if(opt.def_cipher_algo==0 &&
-	   (ascii_strcasecmp(def_cipher_string,"idea")==0
-	    || ascii_strcasecmp(def_cipher_string,"s1")==0))
-          {
-            idea_cipher_warn(1);
-          }
 	xfree(def_cipher_string); def_cipher_string = NULL;
 	if( check_cipher_algo(opt.def_cipher_algo) )
 	    log_error(_("selected cipher algorithm is invalid\n"));
@@ -3364,8 +3320,12 @@ main (int argc, char **argv )
       case aFixTrustDB:
       case aExportOwnerTrust: rc = setup_trustdb( 0, trustdb_name ); break;
       case aListTrustDB: rc = setup_trustdb( argc? 1:0, trustdb_name ); break;
-      default: rc = setup_trustdb(1, trustdb_name ); break;
-    }
+      default:
+          /* No need to create the trust model if we are using the
+         * always trust model.  */
+        rc = setup_trustdb (opt.trust_model != TM_ALWAYS, trustdb_name);
+        break;
+      }
     if( rc )
 	log_error(_("failed to initialize the TrustDB: %s\n"), g10_errstr(rc));
 

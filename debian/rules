@@ -19,8 +19,10 @@ DEB_BUILD_ARCH    := $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 DEB_HOST_ARCH_OS  := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 
 CONFARGS  = --prefix=/usr --libexecdir=/usr/lib/ \
-            --enable-mailto --with-mailprog=/usr/sbin/sendmail \
             --enable-noexecstack
+
+CONFARGS_FULL    = --enable-mailto --with-mailprog=/usr/sbin/sendmail
+CONFARGS_MINIMAL = --enable-minimal --enable-rsa --disable-nls --disable-regex --disable-gnupg-iconv --disable-gettext --without-iconv --without-readline --without-zlib --enable-sha256
 
 ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
 HOSTARG += --host=$(DEB_HOST_GNU_TYPE)
@@ -41,24 +43,22 @@ CFLAGS_DEF = `dpkg-buildflags --get CFLAGS`
 build-deb/config.status:
 	dh_testdir
 	(mkdir -p $(@D); cd $(@D); \
-	    ../configure LDFLAGS="$(LDFLAGS)" CPPFLAGS="$(CPPFLAGS_DEF)" CFLAGS="$(CFLAGS_DEF)" $(CONFARGS) $(HOSTARG) --without-libcurl)
+	    ../configure LDFLAGS="$(LDFLAGS)" CPPFLAGS="$(CPPFLAGS_DEF)" CFLAGS="$(CFLAGS_DEF)" $(CONFARGS) $(CONFARGS_FULL) $(HOSTARG) --without-libcurl)
 
 build-deb-curl/config.status:
 	dh_testdir
 	(mkdir -p $(@D); cd $(@D); \
-	    ../configure LDFLAGS="$(LDFLAGS)" CPPFLAGS="$(CPPFLAGS_DEF)" CFLAGS="$(CFLAGS_DEF)" $(CONFARGS) $(HOSTARG))
+	    ../configure LDFLAGS="$(LDFLAGS)" CPPFLAGS="$(CPPFLAGS_DEF)" CFLAGS="$(CFLAGS_DEF)" $(CONFARGS) $(CONFARGS_FULL) $(HOSTARG))
 
 build-udeb/config.status:
 	dh_testdir
 	(mkdir -p $(@D); cd $(@D); CFLAGS="-g -Os" \
-	    ../configure $(CONFARGS) $(HOSTARG) \
-	    --without-bzip2 --without-readline --without-libcurl)
+	    ../configure $(CONFARGS) $(CONFARGS_MINIMAL) $(HOSTARG) )
 
 build-win32/config.status:
 	dh_testdir
 	(mkdir -p $(@D); cd $(@D); CFLAGS="-g -Os" \
-	    ../configure $(CONFARGS) --host i686-w64-mingw32 \
-	    --disable-gnupg-iconv --without-bzip2 --without-readline --without-libcurl --disable-ldap)
+	    ../configure $(CONFARGS) $(CONFARGS_MINIMAL) --host i686-w64-mingw32 )
 
 ##################################### build ##################################
 
@@ -81,6 +81,9 @@ endif
 build-udeb-stamp: build-udeb/config.status
 	dh_testdir
 	$(MAKE) -C build-udeb/
+ifeq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS)))
+	make -C build-udeb/checks check || exit 1
+endif
 	touch $@
 
 build-win32-stamp: build-win32/config.status
@@ -109,8 +112,6 @@ install: build
 	dh_prep
 	dh_installdirs
 	$(MAKE) -C build-deb install DESTDIR=$(CURDIR)/debian/gnupg
-	: # Move localized manpages to FHS compliant locations
-	mv debian/gnupg/usr/share/man/man1/gpg.ru.1 debian/gnupg/usr/share/man/ru/man1/gpg.1
 	: # Remove from /usr/share/gnupg what we install into /usr/share/doc/gnupg/
 	$(RM) debian/gnupg/usr/share/gnupg/FAQ 
 	$(RM) debian/gnupg/usr/share/info/dir*

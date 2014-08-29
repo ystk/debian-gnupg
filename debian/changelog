@@ -1,18 +1,96 @@
-gnupg (1.4.12-7+deb7u2) wheezy-security; urgency=high
+gnupg (1.4.18-2) unstable; urgency=medium
 
-  * Apply upstream patch to fix infinite recursion in the
-    compressed packet parser (CVE-2013-4402, closes: #725439).
-  * Apply upstream patch to fix treating no-usage-permitted
-    keys as all-usages-permitted (CVE-2013-4351, closes: #722722).
+  [ Cyril Brulebois ]
+  * Fix gpgv-udeb by adding --enable-sha256, which is needed to validate
+    Release files. (Closes: 753985).
+  * Run the check target in the udeb build directory.
 
- -- Thijs Kinkhorst <thijs@debian.org>  Wed, 09 Oct 2013 17:26:36 +0200
+ -- Thijs Kinkhorst <thijs@debian.org>  Mon, 07 Jul 2014 19:55:02 +0200
 
-gnupg (1.4.12-7+deb7u1) wheezy-security; urgency=high
+gnupg (1.4.18-1) unstable; urgency=medium
 
-  * Apply upstream patch to fix side channel attack on RSA
-    (CVE-2013-4242, closes: #717880).
+  * New upstream release.
+    - Drops obsolete Russian manpage (closes: #737033).
+  * Add parcimonie to Suggests (closes: #752260).
+  * Build udebs with --enable-minimal.
 
- -- Thijs Kinkhorst <thijs@debian.org>  Sun, 28 Jul 2013 12:58:25 +0200
+ -- Thijs Kinkhorst <thijs@debian.org>  Mon, 30 Jun 2014 21:55:10 +0200
+
+gnupg (1.4.16-1.2) unstable; urgency=high
+
+  * Non-maintainer upload with maintainers approval.
+  * CVE-2014-4617: Avoid DoS due to garbled compressed data packets.
+    Apply upstream commit to stop a possible DoS using garbled compressed
+    data packets which can be used to put gpg into an infinite loop.
+    (Closes: #752497)
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Tue, 24 Jun 2014 17:02:35 +0200
+
+gnupg (1.4.16-1.1) unstable; urgency=low
+
+  * Non-Maintainer Upload.
+  * Initialize trustdb before clearing it (Closes: #735363)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 20 Jan 2014 22:16:55 -0500
+
+gnupg (1.4.16-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Obsoletes patches CVE-2013-4576 and revert_trustdb_changes.
+    - Fixes build failure on mips64 (closes: #719053).
+  * Update debian/copyright: copyright no longer assigned to FSF.
+  * Add udev rule for SCM331-LC1 / SCR3310 (LP: #1076987).
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Tue, 07 Jan 2014 09:40:14 +0100
+
+gnupg (1.4.15-3) unstable; urgency=high
+
+  * Actually apply patch for CVE-2013-4576 (closes: #732705).
+    Thanks Marc Deslauriers for reporting.
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Fri, 20 Dec 2013 15:41:30 +0100
+
+gnupg (1.4.15-2) unstable; urgency=high
+
+  * Fixed the RSA Key Extraction via Low-Bandwidth Acoustic
+    Cryptanalysis attack as described by Genkin, Shamir, and Tromer.
+    See <http://www.cs.tau.ac.il/~tromer/acoustic/>. [CVE-2013-4576]
+  * Add two Gemalto card readers to udev rules (closes: #730872),
+    thanks Yves-Alexis Perez.
+  * Checked for policy 3.9.5, no changes.
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Thu, 12 Dec 2013 20:34:27 +0100
+
+gnupg (1.4.15-1.1) unstable; urgency=high
+
+  * Non-maintainer upload, by request of Thijs Kinkhorst.
+  * Add patch revert_trustdb_changes:
+   - Revert upstream GIT a1a59e6a539e597996976d0afb6aa3062e954188
+     which breaks popularity-contest (closes: #725889).
+
+ -- Bill Allombert <ballombe@debian.org>  Wed, 16 Oct 2013 13:02:26 +0200
+
+gnupg (1.4.15-1) unstable; urgency=high
+
+  * New upstream release (closes: #725718).
+    - Fixed possible denial of service in the compressed packet
+      parser (CVE-2013-4402, closes: #725439).
+    - Documents limitations of the verify command (closes: #704645).
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Mon, 07 Oct 2013 20:05:43 +0200
+
+gnupg (1.4.14-1) unstable; urgency=low
+
+  * New upstream release (closes: #717845).
+    - Adds IDEA support. Update package description.
+    - Fixes security issue: side channel attack on RSA.
+      (CVE-2013-4242, closes: #717880).
+    - Fixes list-keys hanging at ctrl-C (closes: #399904).
+  * Add more smartcard reader udev rules, thanks Niibe Yutaka
+    (closes: #691392).
+  * Checked for policy 3.9.4, no changes.
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Thu, 25 Jul 2013 21:50:32 +0200
 
 gnupg (1.4.12-7) unstable; urgency=high
 

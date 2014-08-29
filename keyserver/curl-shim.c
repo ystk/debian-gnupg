@@ -1,7 +1,8 @@
 /* curl-shim.c - Implement a small subset of the curl API in terms of
  * the iobuf HTTP API
  *
- * Copyright (C) 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+ * Copyright (C) 2005, 2006, 2007, 2008, 2009, 2012,
+ *               2013 Free Software Foundation, Inc.
  *
  * This file is part of GnuPG.
  *
@@ -164,6 +165,9 @@ curl_easy_perform(CURL *curl)
   CURLcode err=CURLE_OK;
   const char *errstr=NULL;
   char *proxy=NULL;
+  struct http_srv srv;
+
+  memset(&srv,0,sizeof(srv));
 
   /* Emulate the libcurl proxy behavior.  If the calling program set a
      proxy, use it.  If it didn't set a proxy or set it to NULL, check
@@ -176,10 +180,17 @@ curl_easy_perform(CURL *curl)
   else
     proxy=getenv(HTTP_PROXY_ENV);
 
+  if(curl->srvtag)
+    srv.srvtag=curl->srvtag;
+
   if(curl->flags.verbose)
     {
       fprintf(curl->errors,"* HTTP proxy is \"%s\"\n",proxy?proxy:"null");
       fprintf(curl->errors,"* HTTP URL is \"%s\"\n",curl->url);
+      if(srv.srvtag)
+	fprintf(curl->errors,
+		"* SRV tag is \"%s\": host and port may be overridden\n",
+		srv.srvtag);
       fprintf(curl->errors,"* HTTP auth is \"%s\"\n",
 	      curl->auth?curl->auth:"null");
       fprintf(curl->errors,"* HTTP method is %s\n",
@@ -189,11 +200,15 @@ curl_easy_perform(CURL *curl)
   if(curl->flags.post)
     {
       rc=http_open(&curl->hd,HTTP_REQ_POST,curl->url,curl->auth,0,proxy,
-		   curl->srvtag,curl->headers?curl->headers->list:NULL);
+		   &srv,curl->headers?curl->headers->list:NULL);
       if(rc==0)
 	{
 	  char content_len[50];
 	  unsigned int post_len=strlen(curl->postfields);
+
+	  if(curl->flags.verbose && srv.used_server && srv.used_port)
+	    fprintf (curl->errors, "* HTTP host:port post-SRV is \"%s:%hu\"\n",
+		     srv.used_server, srv.used_port);
 
 	  iobuf_writestr(curl->hd.fp_write,
 			 "Content-Type: application/x-www-form-urlencoded\r\n");
@@ -211,9 +226,13 @@ curl_easy_perform(CURL *curl)
   else
     {
       rc=http_open(&curl->hd,HTTP_REQ_GET,curl->url,curl->auth,0,proxy,
-		   curl->srvtag,curl->headers?curl->headers->list:NULL);
+		   &srv,curl->headers?curl->headers->list:NULL);
       if(rc==0)
 	{
+	  if(curl->flags.verbose && srv.used_server && srv.used_port)
+	    fprintf (curl->errors, "* HTTP host:port post-SRV is \"%s:%hu\"\n",
+		     srv.used_server, srv.used_port);
+
 	  rc=http_wait_response(&curl->hd,&curl->status);
 	  if(rc==0)
 	    {
@@ -248,6 +267,8 @@ curl_easy_perform(CURL *curl)
 	}
     }
 
+  free (srv.used_server);
+
   switch(rc)
     {
     case 0:
@@ -269,6 +290,27 @@ curl_easy_perform(CURL *curl)
     }
       
   return handle_error(curl,err,errstr);
+}
+
+CURLcode
+curl_easy_getinfo(CURL *curl, CURLINFO info, ... )
+{
+  va_list ap;
+  long *var;
+
+  va_start(ap,info);
+
+  switch(info)
+    {
+    case CURLINFO_RESPONSE_CODE:
+      var=va_arg(ap,long *);
+      *var=curl->status;
+      break;
+    default:
+      break;
+    }
+
+  return handle_error(curl,CURLE_OK,NULL);
 }
 
 /* This is not the same exact set that is allowed according to

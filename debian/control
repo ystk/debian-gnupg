@@ -5,22 +5,22 @@ Maintainer: Debian GnuPG-Maintainers <pkg-gnupg-maint@lists.alioth.debian.org>
 Uploaders: Sune Vuorela <debian@pusling.com>,
  Daniel Leidert <dleidert@debian.org>,
  Thijs Kinkhorst <thijs@debian.org>
-Standards-Version: 3.9.3
+Standards-Version: 3.9.5
 Build-Depends: debhelper (>> 7), libz-dev, libldap2-dev, libbz2-dev,
  libusb-dev [!hurd-i386],
  libreadline-dev, file, gettext, 
  libcurl4-gnutls-dev
 Build-Depends-Indep: mingw-w64
 Homepage: http://www.gnupg.org
-Vcs-Browser: http://svn.debian.org/wsvn/pkg-gnupg/gnupg/
-Vcs-Svn: svn://svn.debian.org/svn/pkg-gnupg/gnupg/trunk/
+Vcs-Browser: http://anonscm.debian.org/viewvc/pkg-gnupg/gnupg/
+Vcs-Svn: svn://anonscm.debian.org/pkg-gnupg/gnupg/trunk/
 
 Package: gnupg
 Architecture: any
 Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${misc:Depends}, gpgv
 Recommends: ${shlibs:Recommends}, gnupg-curl
-Suggests: gnupg-doc, xloadimage | imagemagick | eog, libpcsclite1
+Suggests: gnupg-doc, xloadimage | imagemagick | eog, libpcsclite1, parcimonie
 Description: GNU privacy guard - a free PGP replacement
  GnuPG is GNU's tool for secure communication and data storage.
  It can be used to encrypt data and to create digital signatures.
@@ -35,10 +35,6 @@ Description: GNU privacy guard - a free PGP replacement
  The gnupg package is built without libcurl. So it does not support
  HKPS keyservers. Install the gnupg-curl package if you want to use
  the keyserver helper tools built with libcurl and supporting HKPS.
- .
- GnuPG does not use any patented algorithms. This means it cannot be
- compatible with PGP2, because that uses IDEA (which is patented in
- a number of countries).
 
 Package: gnupg-curl
 Priority: optional
@@ -54,10 +50,6 @@ Description: GNU privacy guard - a free PGP replacement (cURL)
  This package contains the keyserver helper tools built with libcurl,
  which replace the ones in the gnupg package built with the "curl shim"
  variant of gnupg. This package provides support for HKPS keyservers.
- .
- GnuPG does not use any patented algorithms. This means it cannot be
- compatible with PGP2, because that uses IDEA (which is patented in
- a number of countries).
 
 Package: gpgv
 Architecture: any

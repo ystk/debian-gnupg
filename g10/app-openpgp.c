@@ -688,9 +688,9 @@ store_fpr (app_t app, int keynumber, u32 timestamp,
   xfree (buffer);
 
   tag = (card_version > 0x0007? 0xC7 : 0xC6) + keynumber;
-  flush_cache_item (app, tag);
+  flush_cache_item (app, 0xC5);
   tag2 = 0xCE + keynumber;
-  flush_cache_item (app, tag2);
+  flush_cache_item (app, 0xCD);
 
   rc = iso7816_put_data (app->slot, 0, tag, fpr, 20);
   if (rc)
@@ -2056,8 +2056,7 @@ do_change_pin (app_t app, ctrl_t ctrl,  const char *chvnostr,
   /* TRANSLATORS: Do not translate the "|*|" prefixes but
      keep it at the start of the string.  We need this elsewhere
      to get some infos on the string. */
-  rc = pincb (pincb_arg, 
-              set_resetcode? _("|RN|New Reset Code") :
+  rc = pincb (pincb_arg, set_resetcode? _("|RN|New Reset Code") :
               chvno == 3? _("|AN|New Admin PIN") : _("|N|New PIN"), 
               &pinvalue); 
   if (rc)
