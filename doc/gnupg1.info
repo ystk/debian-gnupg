@@ -1,7 +1,7 @@
-This is /home/wk/w/gnupg-stable/doc/gnupg1.info, produced by makeinfo
-version 4.13 from /home/wk/w/gnupg-stable/doc/gnupg1.texi.
+This is /home/wk/s/gnupg/doc/gnupg1.info, produced by makeinfo version
+4.13 from /home/wk/s/gnupg/doc/gnupg1.texi.
 
-This is the `The GNU Privacy Guard Manual' (1.4.12, 20 January 2012).
+This is the `The GNU Privacy Guard Manual' (1.4.18, 30 June 2014).
 
    Copyright (C) 1998, 1999, 2000, 2001, 2002, 2004, 2005, 2006 Free
 Software Foundation, Inc.
@@ -23,7 +23,7 @@ File: gnupg1.info,  Node: Top,  Next: Invoking GPG,  Up: (dir)
 Using the GnuPG Version 1.4
 ***************************
 
-This is the `The GNU Privacy Guard Manual' (1.4.12, 20 January 2012).
+This is the `The GNU Privacy Guard Manual' (1.4.18, 30 June 2014).
 
    Copyright (C) 1998, 1999, 2000, 2001, 2002, 2004, 2005, 2006 Free
 Software Foundation, Inc.
@@ -195,6 +195,14 @@ File: gnupg1.info,  Node: Operational GPG Commands,  Next: OpenPGP Key Managemen
      a detached signature cannot read the signed material from STDIN
      without denoting it in the above way.
 
+     Note: When verifying a cleartext signature, `gpg' verifies only
+     what makes up the cleartext signed data and not any extra data
+     outside of the cleartext signature or header lines following
+     directly the dash marker line.  The option `--output' may be used
+     to write out the actual signed data; but there are other pitfalls
+     with this format as well.  It is suggested to avoid cleartext
+     signatures in favor of detached signatures.
+
 `--multifile'
      This modifies certain other commands to accept multiple files for
      processing on the command line or read from STDIN with each
@@ -292,8 +300,8 @@ File: gnupg1.info,  Node: Operational GPG Commands,  Next: OpenPGP Key Managemen
      safeguard against accidental deletion of multiple keys.
 
 `--delete-secret-key `name''
-     Remove key from the secret and public keyring. In batch mode the
-     key must be specified by fingerprint.
+     Remove key from the secret keyring. In batch mode the key must be
+     specified by fingerprint.
 
 `--delete-secret-and-public-key `name''
      Same as `--delete-key', but if a secret key exists, it will be
@@ -742,7 +750,9 @@ change the default configuration.
 * GPG Key related Options::     Key related options.
 * GPG Input and Output::        Input and Output.
 * OpenPGP Options::             OpenPGP protocol specific options.
+* Compliance Options::          Compliance options.
 * GPG Esoteric Options::        Doing things one usually don't want to do.
+* Deprecated Options::          Deprecated options.
 
    Long options can be put in an options file (default
 "~/.gnupg/gpg.conf"). Short option names will not work - for example,
@@ -938,9 +948,10 @@ in the option file.
      image type (e.g. "jpg"), "%T" for the MIME type of the image (e.g.
      "image/jpeg"), "%v" for the single-character calculated validity
      of the image being viewed (e.g. "f"), "%V" for the calculated
-     validity as a string (e.g.  "full"), and "%%" for an actual
-     percent sign. If neither %i or %I are present, then the photo will
-     be supplied to the viewer on standard input.
+     validity as a string (e.g.  "full"), "%U" for a base32 encoded
+     hash of the user ID, and "%%" for an actual percent sign. If
+     neither %i or %I are present, then the photo will be supplied to
+     the viewer on standard input.
 
      The default viewer is "xloadimage -fork -quiet -title 'KeyID 0x%k'
      STDIN". Note that if your image viewer program is not secure, then
@@ -984,8 +995,21 @@ in the option file.
      used, the home directory defaults to `~/.gnupg'.  It is only
      recognized when given on the command line.  It also overrides any
      home directory stated through the environment variable `GNUPGHOME'
-     or (on W32 systems) by means of the Registry entry
+     or (on Windows systems) by means of the Registry entry
      HKCU\SOFTWARE\GNU\GNUPG:HOMEDIR.
+
+     On Windows systems it is possible to install GnuPG as a portable
+     application.  In this case only this command line option is
+     considered, all other ways to set a home directory are ignored.
+
+     To install GnuPG as a portable application under Windows, create an
+     empty file name `gpgconf.ctl' in the same directory as the tool
+     `gpgconf.exe'.  The root of the installation is than that
+     directory; or, if `gpgconf.exe' has been installed directly below
+     a directory named `bin', its parent directory.  You also need to
+     make sure that the following directories exist and are writable:
+     `ROOT/home' for the GnuPG home and `ROOT/var/cache/gnupg' for
+     internal cache files.
 
 `--pcsc-driver `file''
      Use `file' to access the smartcard reader. The current default is
@@ -1098,8 +1122,8 @@ in the option file.
      pseudonymous user.
 
      2 means you did casual verification of the key. For example, this
-     could mean that you verified that the key fingerprint and checked
-     the user ID on the key against a photo ID.
+     could mean that you verified the key fingerprint and checked the
+     user ID on the key against a photo ID.
 
      3 means you did extensive verification of the key. For example,
      this could mean that you verified the key fingerprint with the
@@ -1150,7 +1174,8 @@ in the option file.
           some   external validation scheme. This option also
           suppresses the   "[uncertain]" tag printed with signature
           checks when there is no   evidence that the user ID is bound
-          to the key.
+          to the key.  Note that this   trust model still does not
+          allow the use of expired, revoked, or   disabled keys.
 
     auto
           Select the trust model depending on whatever the internal
@@ -1196,6 +1221,10 @@ in the option file.
           any of the   mechanisms defined by the `--auto-key-locate'
           are tried.  The   position of this mechanism in the list does
           not matter.  It is not   required if `local' is also used.
+
+    clear
+          Clear all defined mechanisms.  This is useful to override
+          mechanisms given in a config file.
 
 
 `--keyid-format `short|0xshort|long|0xlong''
@@ -1332,6 +1361,7 @@ in the option file.
           Note that depending on the SSL library that the keyserver
           helper is   built with, this may actually be a directory or a
           file.
+
 
 `--completes-needed `n''
      Number of completely trusted users to introduce a new key signer
@@ -1687,7 +1717,7 @@ File: gnupg1.info,  Node: GPG Input and Output,  Next: OpenPGP Options,  Prev: G
 
 
 
-File: gnupg1.info,  Node: OpenPGP Options,  Next: GPG Esoteric Options,  Prev: GPG Input and Output,  Up: GPG Options
+File: gnupg1.info,  Node: OpenPGP Options,  Next: Compliance Options,  Prev: GPG Input and Output,  Up: GPG Options
 
 1.2.4 OpenPGP protocol specific options.
 ----------------------------------------
@@ -1791,6 +1821,9 @@ File: gnupg1.info,  Node: OpenPGP Options,  Next: GPG Esoteric Options,  Prev: G
      only meaningful if `--s2k-mode' is 3.
 
 
+
+File: gnupg1.info,  Node: Compliance Options,  Next: GPG Esoteric Options,  Prev: OpenPGP Options,  Up: GPG Options
+
 1.2.5 Compliance options
 ------------------------
 
@@ -1835,7 +1868,7 @@ OPENPGP PROGRAMS section below before using one of these options.
 
      This option implies `--rfc1991 --disable-mdc --no-force-v4-certs
      --escape-from-lines --force-v3-sigs --cipher-algo IDEA
-     --digest-algo MD5 --compress-algo ZIP'. It also disables
+     --digest-algo MD5--compress-algo ZIP'. It also disables
      `--textmode' when encrypting.
 
 `--pgp6'
@@ -1864,7 +1897,7 @@ OPENPGP PROGRAMS section below before using one of these options.
 
 
 
-File: gnupg1.info,  Node: GPG Esoteric Options,  Prev: OpenPGP Options,  Up: GPG Options
+File: gnupg1.info,  Node: GPG Esoteric Options,  Next: Deprecated Options,  Prev: Compliance Options,  Up: GPG Options
 
 1.2.6 Doing things one usually doesn't want to do.
 --------------------------------------------------
@@ -1974,8 +2007,12 @@ File: gnupg1.info,  Node: GPG Esoteric Options,  Prev: OpenPGP Options,  Up: GPG
 
 `--emit-version'
 `--no-emit-version'
-     Force inclusion of the version string in ASCII armored output.
-     `--no-emit-version' disables this option.
+     Force inclusion of the version string in ASCII armored output.  If
+     given once only the name of the program and the major number is
+     emitted (default), given twice the minor is also emitted, given
+     triple the micro is added, and given quad an operating system
+     identification is also emitted.  `--no-emit-version' disables the
+     version line.
 
 `--sig-notation `name=value''
 `--cert-notation `name=value''
@@ -1989,7 +2026,7 @@ File: gnupg1.info,  Node: GPG Esoteric Options,  Prev: OpenPGP Options,  Up: GPG
      may be any printable string; it will be encoded in UTF8, so you
      should check that your `--display-charset' is set correctly. If
      you prefix `name' with an exclamation mark (!), the notation data
-     will be flagged as critical (rfc2440:5.2.3.15). `--sig-notation'
+     will be flagged as critical (rfc4880:5.2.3.16). `--sig-notation'
      sets a notation for data signatures. `--cert-notation' sets a
      notation for key signatures (certifications). `--set-notation'
      sets both.
@@ -2010,7 +2047,7 @@ File: gnupg1.info,  Node: GPG Esoteric Options,  Prev: OpenPGP Options,  Up: GPG
 `--sig-policy-url `string''
 `--cert-policy-url `string''
 `--set-policy-url `string''
-     Use `string' as a Policy URL for signatures (rfc2440:5.2.3.19).  If
+     Use `string' as a Policy URL for signatures (rfc4880:5.2.3.20).  If
      you prefix it with an exclamation mark (!), the policy URL packet
      will be flagged as critical. `--sig-policy-url' sets a policy url
      for data signatures. `--cert-policy-url' sets a policy url for key
@@ -2342,6 +2379,15 @@ File: gnupg1.info,  Node: GPG Esoteric Options,  Prev: OpenPGP Options,  Up: GPG
      a syntax check on the configuration file.
 
 
+   ---------- Footnotes ----------
+
+   (1) Using a little social engineering anyone who is able to decrypt
+the message can check whether one of the other recipients is the one he
+suspects.
+
+
+File: gnupg1.info,  Node: Deprecated Options,  Prev: GPG Esoteric Options,  Up: GPG Options
+
 1.2.7 Deprecated options
 ------------------------
 
@@ -2390,12 +2436,6 @@ File: gnupg1.info,  Node: GPG Esoteric Options,  Prev: OpenPGP Options,  Up: GPG
      [no-]show-policy-url' instead.
 
 
-   ---------- Footnotes ----------
-
-   (1) Using a little social engineering anyone who is able to decrypt
-the message can check whether one of the other recipients is the one he
-suspects.
-
 
 File: gnupg1.info,  Node: GPG Configuration,  Next: GPG Examples,  Prev: GPG Options,  Up: Invoking GPG
 
@@ -2411,7 +2451,7 @@ directory (*note option --homedir::).
      startup.  It may contain any valid long option; the leading two
      dashes   may not be entered and the option may not be abbreviated.
      This default   name may be changed on the command line (*note
-     option --options::).    You should backup this file.
+     gpg-option --options::).    You should backup this file.
 
 
    Note that on larger installations, it is useful to put predefined
@@ -2422,17 +2462,14 @@ start up with a working configuration.
 They all live in in the current home directory (*note option
 --homedir::).  Only the `gpg' may modify these files.
 
-`~/.gnupg/secring.gpg'
-     The secret keyring.  You should backup this file.
-
-`~/.gnupg/secring.gpg.lock'
-     The lock file for the secret keyring.
-
 `~/.gnupg/pubring.gpg'
      The public keyring.  You should backup this file.
 
 `~/.gnupg/pubring.gpg.lock'
      The lock file for the public keyring.
+
+`~/.gnupg/secring.gpg'
+     The secret keyring.  You should backup this file.
 
 `~/.gnupg/trustdb.gpg'
      The trust database.  There is no need to backup this file; it is
@@ -2444,6 +2481,9 @@ They all live in in the current home directory (*note option
 
 `~/.gnupg/random_seed'
      A file used to preserve the state of the internal random pool.
+
+`~/.gnupg/secring.gpg.lock'
+     The lock file for the secret keyring.
 
 `/usr[/local]/share/gnupg/options.skel'
      The skeleton options file.
@@ -2461,8 +2501,8 @@ GNUPGHOME
      If set directory used instead of "~/.gnupg".
 
 GPG_AGENT_INFO
-     Used to locate the gpg-agent.      This is only honored when
-     `--use-agent' is set.      The value consists of 3 colon delimited
+     Used to locate the gpg-agent.    This is only honored when
+     `--use-agent' is set.    The value consists of 3 colon delimited
      fields: The first is the path   to the Unix Domain Socket, the
      second the PID of the gpg-agent and the   protocol version which
      should be set to 1. When starting the gpg-agent   as described in
@@ -2615,8 +2655,8 @@ always required for this.
 
 File: gnupg1.info,  Node: Unattended GPG key generation,  Up: Unattended Usage of GPG
 
-1.6 Unattended key generation
-=============================
+1.5.1 Unattended key generation
+-------------------------------
 
 The command `--gen-key' may be used along with the option `--batch' for
 unattended key generation.  The parameters are either read from stdin
@@ -2756,21 +2796,24 @@ Name-Email: EMAIL
 
 Expire-Date: ISO-DATE|(NUMBER[d|w|m|y])
      Set the expiration date for the key (and the subkey).  It may
-     either be entered in ISO date format (2000-08-15) or as number of
-     days, weeks, month or years.  The special notation "seconds=N" is
-     also allowed to directly give an Epoch value. Without a letter
-     days are assumed.  Note that there is no check done on the
-     overflow of the type used by OpenPGP for timestamps.  Thus you
-     better make sure that the given value make sense.  Although
-     OpenPGP works with time intervals, GnuPG uses an absolute value
-     internally and thus the last year we can represent is 2105.
+     either be entered in ISO date format (e.g. "20000815T145012") or
+     as number of days, weeks, month or years after the creation date.
+     The special notation "seconds=N" is also allowed to specify a
+     number of seconds since creation.  Without a letter days are
+     assumed.  Note that there is no check done on the overflow of the
+     type used by OpenPGP for timestamps.  Thus you better make sure
+     that the given value make sense.  Although OpenPGP works with time
+     intervals, GnuPG uses an absolute value internally and thus the
+     last year we can represent is 2105.
 
 Ceation-Date: ISO-DATE
      Set the creation date of the key as stored in the key information
      and which is also part of the fingerprint calculation.  Either a
      date like "1986-04-26" or a full timestamp like "19860426T042640"
-     may be used.  The time is considered to be UTC.  If it is not
-     given the current time is used.
+     may be used.  The time is considered to be UTC.  The special
+     notation "seconds=N" may be used to directly specify a the number
+     of seconds since Epoch (Unix time).  If it is not given the
+     current time is used.
 
 Preferences: STRING
      Set the cipher, hash, and compression preference values for this
@@ -3688,73 +3731,71 @@ Option Index
 * Menu:
 
 * allow-freeform-uid:                    GPG Esoteric Options.
-                                                              (line 311)
+                                                              (line 315)
 * allow-multiple-messages:               GPG Esoteric Options.
-                                                              (line 428)
+                                                              (line 432)
 * allow-non-selfsigned-uid:              GPG Esoteric Options.
-                                                              (line 306)
+                                                              (line 310)
 * allow-secret-key-import:               GPG Esoteric Options.
-                                                              (line 423)
-* always-trust:                          GPG Esoteric Options.
-                                                              (line 508)
+                                                              (line 427)
+* always-trust:                          Deprecated Options.  (line  32)
 * armor:                                 GPG Input and Output.
                                                               (line   8)
 * ask-cert-expire:                       GPG Esoteric Options.
-                                                              (line 410)
+                                                              (line 414)
 * ask-cert-level:                        GPG Configuration Options.
-                                                              (line 322)
+                                                              (line 336)
 * ask-sig-expire:                        GPG Esoteric Options.
-                                                              (line 396)
+                                                              (line 400)
 * attribute-fd:                          GPG Esoteric Options.
                                                               (line  89)
 * attribute-file:                        GPG Esoteric Options.
                                                               (line  95)
 * auto-check-trustdb:                    GPG Configuration Options.
-                                                              (line 618)
+                                                              (line 638)
 * auto-key-locate:                       GPG Configuration Options.
-                                                              (line 402)
+                                                              (line 417)
 * batch:                                 GPG Configuration Options.
                                                               (line  39)
 * bzip2-compress-level:                  GPG Configuration Options.
-                                                              (line 296)
+                                                              (line 310)
 * bzip2-decompress-lowmem:               GPG Configuration Options.
-                                                              (line 306)
+                                                              (line 320)
 * card-edit:                             Operational GPG Commands.
-                                                              (line 150)
+                                                              (line 158)
 * card-status:                           Operational GPG Commands.
-                                                              (line 156)
+                                                              (line 164)
 * cert-digest-algo:                      GPG Esoteric Options.
-                                                              (line 225)
+                                                              (line 229)
 * cert-notation:                         GPG Esoteric Options.
-                                                              (line 117)
+                                                              (line 121)
 * cert-policy-url:                       GPG Esoteric Options.
-                                                              (line 147)
+                                                              (line 151)
 * change-pin:                            Operational GPG Commands.
-                                                              (line 159)
+                                                              (line 167)
 * check-sigs:                            Operational GPG Commands.
-                                                              (line 127)
+                                                              (line 135)
 * check-trustdb:                         Operational GPG Commands.
-                                                              (line 250)
+                                                              (line 258)
 * cipher-algo:                           GPG Esoteric Options.
-                                                              (line 185)
+                                                              (line 189)
 * clearsign:                             Operational GPG Commands.
                                                               (line  17)
 * command-fd:                            GPG Esoteric Options.
-                                                              (line 294)
+                                                              (line 298)
 * command-file:                          GPG Esoteric Options.
-                                                              (line 301)
+                                                              (line 305)
 * comment:                               GPG Esoteric Options.
                                                               (line 100)
 * compliant-needed:                      GPG Configuration Options.
-                                                              (line 577)
+                                                              (line 597)
 * compress-algo:                         GPG Esoteric Options.
-                                                              (line 202)
+                                                              (line 206)
 * compress-level:                        GPG Configuration Options.
-                                                              (line 296)
-* ctapi-driver:                          GPG Esoteric Options.
-                                                              (line 503)
+                                                              (line 310)
+* ctapi-driver:                          Deprecated Options.  (line  27)
 * dearmor:                               Operational GPG Commands.
-                                                              (line 305)
+                                                              (line 313)
 * debug:                                 GPG Esoteric Options.
                                                               (line  51)
 * debug-all:                             GPG Esoteric Options.
@@ -3766,56 +3807,56 @@ Option Index
 * decrypt:                               Operational GPG Commands.
                                                               (line  52)
 * decrypt-files:                         Operational GPG Commands.
-                                                              (line  87)
+                                                              (line  95)
 * default-cert-expire:                   GPG Esoteric Options.
-                                                              (line 416)
+                                                              (line 420)
 * default-cert-level:                    GPG Configuration Options.
-                                                              (line 330)
+                                                              (line 344)
 * default-key:                           GPG Configuration Options.
                                                               (line  10)
 * default-keyserver-url:                 GPG Esoteric Options.
-                                                              (line 456)
+                                                              (line 460)
 * default-preference-list:               GPG Esoteric Options.
-                                                              (line 451)
+                                                              (line 455)
 * default-recipient:                     GPG Configuration Options.
                                                               (line  15)
 * default-recipient-self:                GPG Configuration Options.
                                                               (line  19)
 * default-sig-expire:                    GPG Esoteric Options.
-                                                              (line 402)
+                                                              (line 406)
 * delete-key:                            Operational GPG Commands.
-                                                              (line 164)
+                                                              (line 172)
 * delete-secret-and-public-key:          Operational GPG Commands.
-                                                              (line 173)
+                                                              (line 181)
 * delete-secret-key:                     Operational GPG Commands.
-                                                              (line 169)
+                                                              (line 177)
 * desig-revoke:                          OpenPGP Key Management.
                                                               (line  21)
 * detach-sign:                           Operational GPG Commands.
                                                               (line  27)
 * digest-algo:                           GPG Esoteric Options.
-                                                              (line 194)
+                                                              (line 198)
 * disable-ccid:                          GPG Configuration Options.
-                                                              (line 237)
+                                                              (line 251)
 * disable-cipher-algo:                   GPG Esoteric Options.
-                                                              (line 233)
+                                                              (line 237)
 * disable-dsa2:                          GPG Configuration Options.
                                                               (line 167)
 * disable-mdc:                           OpenPGP Options.     (line  46)
 * disable-pubkey-algo:                   GPG Esoteric Options.
-                                                              (line 238)
+                                                              (line 242)
 * display-charset:                       GPG Configuration Options.
-                                                              (line 251)
+                                                              (line 265)
 * display-charset:iso-8859-1:            GPG Configuration Options.
-                                                              (line 260)
+                                                              (line 274)
 * display-charset:iso-8859-15:           GPG Configuration Options.
-                                                              (line 266)
+                                                              (line 280)
 * display-charset:iso-8859-2:            GPG Configuration Options.
-                                                              (line 263)
+                                                              (line 277)
 * display-charset:koi8-r:                GPG Configuration Options.
-                                                              (line 269)
+                                                              (line 283)
 * display-charset:utf-8:                 GPG Configuration Options.
-                                                              (line 272)
+                                                              (line 286)
 * dry-run:                               GPG Esoteric Options.
                                                               (line   8)
 * dump-options:                          General GPG Commands.
@@ -3829,63 +3870,63 @@ Option Index
 * enable-progress-filter:                GPG Esoteric Options.
                                                               (line  68)
 * enable-special-filenames:              GPG Esoteric Options.
-                                                              (line 438)
+                                                              (line 442)
 * enarmor:                               Operational GPG Commands.
-                                                              (line 305)
+                                                              (line 313)
 * encrypt:                               Operational GPG Commands.
                                                               (line  31)
 * encrypt-files:                         Operational GPG Commands.
-                                                              (line  84)
+                                                              (line  92)
 * encrypt-to:                            GPG Key related Options.
                                                               (line  21)
 * escape-from-lines:                     GPG Esoteric Options.
-                                                              (line 263)
+                                                              (line 267)
 * exec-path:                             GPG Configuration Options.
-                                                              (line 190)
+                                                              (line 191)
 * exit-on-status-write-error:            GPG Configuration Options.
-                                                              (line 651)
+                                                              (line 671)
 * expert:                                GPG Configuration Options.
-                                                              (line 709)
+                                                              (line 729)
 * export:                                Operational GPG Commands.
-                                                              (line 178)
+                                                              (line 186)
 * export-options:                        GPG Input and Output.
                                                               (line  67)
 * export-ownertrust:                     Operational GPG Commands.
-                                                              (line 265)
+                                                              (line 273)
 * export-secret-keys:                    Operational GPG Commands.
-                                                              (line 194)
+                                                              (line 202)
 * export-secret-subkeys:                 Operational GPG Commands.
-                                                              (line 194)
+                                                              (line 202)
 * faked-system-time:                     GPG Esoteric Options.
                                                               (line  62)
 * fast-list-mode:                        GPG Esoteric Options.
-                                                              (line 361)
+                                                              (line 365)
 * fetch-keys:                            Operational GPG Commands.
-                                                              (line 235)
+                                                              (line 243)
 * fingerprint:                           Operational GPG Commands.
-                                                              (line 139)
+                                                              (line 147)
 * fixed-list-mode:                       GPG Input and Output.
                                                               (line 118)
 * for-your-eyes-only:                    GPG Esoteric Options.
-                                                              (line 171)
+                                                              (line 175)
 * force-mdc:                             OpenPGP Options.     (line  40)
 * force-v3-sigs:                         OpenPGP Options.     (line  25)
 * force-v4-certs:                        OpenPGP Options.     (line  35)
 * gen-key:                               OpenPGP Key Management.
                                                               (line   9)
 * gen-prime:                             Operational GPG Commands.
-                                                              (line 299)
+                                                              (line 307)
 * gen-random:                            Operational GPG Commands.
-                                                              (line 292)
+                                                              (line 300)
 * gen-revoke:                            OpenPGP Key Management.
                                                               (line  17)
-* gnupg:                                 OpenPGP Options.     (line 114)
+* gnupg:                                 Compliance Options.  (line  12)
 * gpg-agent-info:                        GPG Configuration Options.
-                                                              (line 630)
+                                                              (line 650)
 * gpgconf-list:                          GPG Esoteric Options.
-                                                              (line 469)
-* gpgconf-test:                          GPG Esoteric Options.
                                                               (line 473)
+* gpgconf-test:                          GPG Esoteric Options.
+                                                              (line 477)
 * group:                                 GPG Key related Options.
                                                               (line  41)
 * help:                                  General GPG Commands.
@@ -3895,21 +3936,21 @@ Option Index
 * hidden-recipient:                      GPG Key related Options.
                                                               (line  14)
 * homedir:                               GPG Configuration Options.
-                                                              (line 223)
+                                                              (line 224)
 * ignore-crc-error:                      GPG Esoteric Options.
-                                                              (line 331)
+                                                              (line 335)
 * ignore-mdc-error:                      GPG Esoteric Options.
-                                                              (line 338)
+                                                              (line 342)
 * ignore-time-conflict:                  GPG Esoteric Options.
-                                                              (line 317)
+                                                              (line 321)
 * ignore-valid-from:                     GPG Esoteric Options.
-                                                              (line 324)
+                                                              (line 328)
 * import:                                Operational GPG Commands.
-                                                              (line 204)
+                                                              (line 212)
 * import-options:                        GPG Input and Output.
                                                               (line  29)
 * import-ownertrust:                     Operational GPG Commands.
-                                                              (line 271)
+                                                              (line 279)
 * interactive:                           GPG Esoteric Options.
                                                               (line  19)
 * keyedit:addcardkey:                    OpenPGP Key Management.
@@ -3989,19 +4030,19 @@ Option Index
 * keyedit:uid:                           OpenPGP Key Management.
                                                               (line  31)
 * keyid-format:                          GPG Configuration Options.
-                                                              (line 442)
-* keyring:                               GPG Configuration Options.
-                                                              (line 197)
-* keyserver:                             GPG Configuration Options.
-                                                              (line 449)
-* keyserver-options:                     GPG Configuration Options.
-                                                              (line 469)
-* limit-card-insert-tries:               GPG Configuration Options.
-                                                              (line 660)
-* list-config:                           GPG Esoteric Options.
                                                               (line 461)
+* keyring:                               GPG Configuration Options.
+                                                              (line 198)
+* keyserver:                             GPG Configuration Options.
+                                                              (line 468)
+* keyserver-options:                     GPG Configuration Options.
+                                                              (line 488)
+* limit-card-insert-tries:               GPG Configuration Options.
+                                                              (line 680)
+* list-config:                           GPG Esoteric Options.
+                                                              (line 465)
 * list-keys:                             Operational GPG Commands.
-                                                              (line  92)
+                                                              (line 100)
 * list-only:                             GPG Esoteric Options.
                                                               (line  11)
 * list-options:                          GPG Configuration Options.
@@ -4031,21 +4072,20 @@ Option Index
 * list-options:show-user-notations:      GPG Configuration Options.
                                                               (line  81)
 * list-packets:                          Operational GPG Commands.
-                                                              (line 146)
+                                                              (line 154)
 * list-secret-keys:                      Operational GPG Commands.
-                                                              (line 105)
+                                                              (line 113)
 * list-sigs:                             Operational GPG Commands.
-                                                              (line 111)
-* load-extension:                        GPG Esoteric Options.
-                                                              (line 483)
+                                                              (line 119)
+* load-extension:                        Deprecated Options.  (line   7)
 * local-user:                            GPG Key related Options.
                                                               (line  63)
 * lock-multiple:                         GPG Configuration Options.
-                                                              (line 640)
+                                                              (line 660)
 * lock-never:                            GPG Configuration Options.
-                                                              (line 644)
+                                                              (line 664)
 * lock-once:                             GPG Configuration Options.
-                                                              (line 636)
+                                                              (line 656)
 * log-file:                              GPG Esoteric Options.
                                                               (line  85)
 * logger-fd:                             GPG Esoteric Options.
@@ -4053,17 +4093,17 @@ Option Index
 * lsign-key:                             OpenPGP Key Management.
                                                               (line 289)
 * mangle-dos-filenames:                  GPG Configuration Options.
-                                                              (line 314)
+                                                              (line 328)
 * marginals-needed:                      GPG Configuration Options.
-                                                              (line 581)
+                                                              (line 601)
 * max-cert-depth:                        GPG Configuration Options.
-                                                              (line 585)
+                                                              (line 605)
 * max-output:                            GPG Input and Output.
                                                               (line  19)
 * min-cert-level:                        GPG Configuration Options.
-                                                              (line 359)
+                                                              (line 373)
 * multifile:                             Operational GPG Commands.
-                                                              (line  73)
+                                                              (line  81)
 * no:                                    GPG Configuration Options.
                                                               (line  56)
 * no-armor:                              GPG Input and Output.
@@ -4071,33 +4111,33 @@ Option Index
 * no-batch:                              GPG Configuration Options.
                                                               (line  39)
 * no-default-keyring:                    GPG Esoteric Options.
-                                                              (line 346)
+                                                              (line 350)
 * no-default-recipient:                  GPG Configuration Options.
                                                               (line  25)
 * no-encrypt-to:                         GPG Key related Options.
                                                               (line  37)
 * no-expensive-trust-checks:             GPG Esoteric Options.
-                                                              (line 443)
+                                                              (line 447)
 * no-greeting:                           GPG Configuration Options.
-                                                              (line 674)
+                                                              (line 694)
 * no-groups:                             GPG Key related Options.
                                                               (line  59)
 * no-literal:                            GPG Esoteric Options.
-                                                              (line 369)
+                                                              (line 373)
 * no-mangle-dos-filenames:               GPG Configuration Options.
-                                                              (line 314)
+                                                              (line 328)
 * no-mdc-warning:                        GPG Configuration Options.
-                                                              (line 693)
+                                                              (line 713)
 * no-options:                            GPG Configuration Options.
-                                                              (line 289)
+                                                              (line 303)
 * no-random-seed-file:                   GPG Configuration Options.
-                                                              (line 668)
+                                                              (line 688)
 * no-secmem-warning:                     GPG Configuration Options.
-                                                              (line 677)
+                                                              (line 697)
 * no-sig-cache:                          GPG Configuration Options.
-                                                              (line 599)
+                                                              (line 619)
 * no-sig-create-check:                   GPG Configuration Options.
-                                                              (line 608)
+                                                              (line 628)
 * no-skip-hidden-recipients:             GPG Key related Options.
                                                               (line  75)
 * no-tty:                                GPG Configuration Options.
@@ -4105,104 +4145,100 @@ Option Index
 * no-verbose:                            GPG Configuration Options.
                                                               (line  32)
 * not-dash-escaped:                      GPG Esoteric Options.
-                                                              (line 253)
-* openpgp:                               OpenPGP Options.     (line 122)
+                                                              (line 257)
+* openpgp:                               Compliance Options.  (line  20)
 * options:                               GPG Configuration Options.
-                                                              (line 284)
+                                                              (line 298)
 * output:                                GPG Input and Output.
                                                               (line  16)
 * override-session-key:                  GPG Esoteric Options.
-                                                              (line 387)
+                                                              (line 391)
 * passphrase:                            GPG Esoteric Options.
-                                                              (line 288)
+                                                              (line 292)
 * passphrase-fd:                         GPG Esoteric Options.
-                                                              (line 275)
+                                                              (line 279)
 * passphrase-file:                       GPG Esoteric Options.
-                                                              (line 281)
+                                                              (line 285)
 * passphrase-repeat:                     GPG Esoteric Options.
-                                                              (line 270)
+                                                              (line 274)
 * pcsc-driver:                           GPG Configuration Options.
-                                                              (line 231)
+                                                              (line 245)
 * permission-warning:                    GPG Configuration Options.
-                                                              (line 680)
+                                                              (line 700)
 * personal-cipher-preferences:           OpenPGP Options.     (line  51)
 * personal-compress-preferences:         OpenPGP Options.     (line  70)
 * personal-digest-preferences:           OpenPGP Options.     (line  60)
-* pgp2:                                  OpenPGP Options.     (line 140)
-* pgp6:                                  OpenPGP Options.     (line 153)
-* pgp7:                                  OpenPGP Options.     (line 164)
-* pgp8:                                  OpenPGP Options.     (line 170)
+* pgp2:                                  Compliance Options.  (line  38)
+* pgp6:                                  Compliance Options.  (line  51)
+* pgp7:                                  Compliance Options.  (line  62)
+* pgp8:                                  Compliance Options.  (line  68)
 * photo-viewer:                          GPG Configuration Options.
                                                               (line 173)
 * preserve-permissions:                  GPG Esoteric Options.
-                                                              (line 446)
+                                                              (line 450)
 * primary-keyring:                       GPG Configuration Options.
-                                                              (line 211)
+                                                              (line 212)
 * print-md:                              Operational GPG Commands.
-                                                              (line 287)
+                                                              (line 295)
 * quiet:                                 GPG Configuration Options.
                                                               (line  35)
 * reader-port:                           GPG Configuration Options.
-                                                              (line 243)
+                                                              (line 257)
 * rebuild-keydb-caches:                  Operational GPG Commands.
-                                                              (line 281)
+                                                              (line 289)
 * recipient:                             GPG Key related Options.
                                                               (line   8)
 * recv-keys:                             Operational GPG Commands.
-                                                              (line 213)
+                                                              (line 221)
 * refresh-keys:                          Operational GPG Commands.
-                                                              (line 217)
+                                                              (line 225)
 * require-cross-certification:           GPG Configuration Options.
-                                                              (line 702)
+                                                              (line 722)
 * require-secmem:                        GPG Configuration Options.
-                                                              (line 697)
-* rfc1991:                               OpenPGP Options.     (line 137)
-* rfc2440:                               OpenPGP Options.     (line 133)
-* rfc4880:                               OpenPGP Options.     (line 128)
+                                                              (line 717)
+* rfc1991:                               Compliance Options.  (line  35)
+* rfc2440:                               Compliance Options.  (line  31)
+* rfc4880:                               Compliance Options.  (line  26)
 * s2k-cipher-algo:                       OpenPGP Options.     (line  80)
 * s2k-count:                             OpenPGP Options.     (line  97)
 * s2k-digest-algo:                       OpenPGP Options.     (line  86)
 * s2k-mode:                              OpenPGP Options.     (line  90)
 * search-keys:                           Operational GPG Commands.
-                                                              (line 226)
+                                                              (line 234)
 * secret-keyring:                        GPG Configuration Options.
-                                                              (line 208)
+                                                              (line 209)
 * send-keys:                             Operational GPG Commands.
-                                                              (line 185)
+                                                              (line 193)
 * set-filename:                          GPG Esoteric Options.
-                                                              (line 165)
+                                                              (line 169)
 * set-filesize:                          GPG Esoteric Options.
-                                                              (line 373)
-* set-notation:                          GPG Esoteric Options.
-                                                              (line 117)
-* set-policy-url:                        GPG Esoteric Options.
-                                                              (line 147)
-* show-keyring:                          GPG Esoteric Options.
-                                                              (line 498)
-* show-notation:                         GPG Esoteric Options.
-                                                              (line 512)
-* show-photos:                           GPG Esoteric Options.
-                                                              (line 490)
-* show-policy-url:                       GPG Esoteric Options.
-                                                              (line 520)
-* show-session-key:                      GPG Esoteric Options.
                                                               (line 377)
+* set-notation:                          GPG Esoteric Options.
+                                                              (line 121)
+* set-policy-url:                        GPG Esoteric Options.
+                                                              (line 151)
+* show-keyring:                          Deprecated Options.  (line  22)
+* show-notation:                         Deprecated Options.  (line  36)
+* show-photos:                           Deprecated Options.  (line  14)
+* show-policy-url:                       Deprecated Options.  (line  44)
+* show-session-key:                      GPG Esoteric Options.
+                                                              (line 381)
 * sig-keyserver-url:                     GPG Esoteric Options.
-                                                              (line 157)
+                                                              (line 161)
 * sig-notation:                          GPG Esoteric Options.
-                                                              (line 117)
+                                                              (line 121)
 * sig-policy-url:                        GPG Esoteric Options.
-                                                              (line 147)
+                                                              (line 151)
 * sign:                                  Operational GPG Commands.
                                                               (line   8)
 * sign-key:                              OpenPGP Key Management.
                                                               (line 285)
 * simple-sk-checksum:                    GPG Configuration Options.
-                                                              (line 588)
+                                                              (line 608)
 * skip-hidden-recipients:                GPG Key related Options.
                                                               (line  75)
 * skip-verify:                           GPG Esoteric Options.
-                                                              (line 353)
+                                                              (line 357)
 * status-fd:                             GPG Esoteric Options.
                                                               (line  73)
 * status-file:                           GPG Esoteric Options.
@@ -4213,41 +4249,41 @@ Option Index
                                                               (line  39)
 * textmode:                              OpenPGP Options.     (line   8)
 * throw-keyids:                          GPG Esoteric Options.
-                                                              (line 244)
+                                                              (line 248)
 * trust-mode:always:                     GPG Configuration Options.
-                                                              (line 388)
+                                                              (line 402)
 * trust-mode:auto:                       GPG Configuration Options.
-                                                              (line 396)
+                                                              (line 411)
 * trust-mode:classic:                    GPG Configuration Options.
-                                                              (line 380)
+                                                              (line 394)
 * trust-mode:direct:                     GPG Configuration Options.
-                                                              (line 384)
+                                                              (line 398)
 * trust-mode:pgp:                        GPG Configuration Options.
-                                                              (line 375)
+                                                              (line 389)
 * trust-model:                           GPG Configuration Options.
-                                                              (line 372)
+                                                              (line 386)
 * trustdb-name:                          GPG Configuration Options.
-                                                              (line 216)
+                                                              (line 217)
 * trusted-key:                           GPG Configuration Options.
-                                                              (line 365)
+                                                              (line 379)
 * try-all-secrets:                       GPG Key related Options.
                                                               (line  67)
 * ungroup:                               GPG Key related Options.
                                                               (line  56)
 * update-trustdb:                        Operational GPG Commands.
-                                                              (line 240)
+                                                              (line 248)
 * use-agent:                             GPG Configuration Options.
-                                                              (line 625)
+                                                              (line 645)
 * use-embedded-filename:                 GPG Esoteric Options.
-                                                              (line 180)
+                                                              (line 184)
 * utf8-strings:                          GPG Configuration Options.
-                                                              (line 277)
+                                                              (line 291)
 * verbose:                               GPG Configuration Options.
                                                               (line  28)
 * verify:                                Operational GPG Commands.
                                                               (line  60)
 * verify-files:                          Operational GPG Commands.
-                                                              (line  81)
+                                                              (line  89)
 * verify-options:                        GPG Configuration Options.
                                                               (line 118)
 * verify-options:pka-lookups:            GPG Configuration Options.
@@ -4281,7 +4317,7 @@ Option Index
 * with-fingerprint:                      GPG Input and Output.
                                                               (line 122)
 * with-key-data:                         GPG Esoteric Options.
-                                                              (line 357)
+                                                              (line 361)
 * yes:                                   GPG Configuration Options.
                                                               (line  53)
 
@@ -4302,31 +4338,33 @@ Index
 
 
 Tag Table:
-Node: Top775
-Node: Invoking GPG1819
-Ref: Invoking GPG-Footnote-12712
-Node: GPG Commands2777
-Node: General GPG Commands3608
-Node: Operational GPG Commands4240
-Ref: option --export-ownertrust16209
-Node: OpenPGP Key Management18006
-Node: GPG Options29871
-Node: GPG Configuration Options31095
-Ref: option --homedir39936
-Ref: option --options42491
-Node: GPG Key related Options62073
-Node: GPG Input and Output65657
-Node: OpenPGP Options71135
-Node: GPG Esoteric Options79164
-Ref: GPG Esoteric Options-Footnote-1101934
-Node: GPG Configuration102088
-Node: GPG Examples105323
-Node: Unattended Usage of GPG109658
-Node: Unattended GPG key generation110098
-Node: Specify a User ID119231
-Ref: how-to-specify-a-user-id119380
-Node: Copying124122
-Node: Option Index161755
-Node: Index203378
+Node: Top758
+Node: Invoking GPG1799
+Ref: Invoking GPG-Footnote-12692
+Node: GPG Commands2757
+Node: General GPG Commands3588
+Node: Operational GPG Commands4220
+Ref: option --export-ownertrust16640
+Node: OpenPGP Key Management18437
+Node: GPG Options30302
+Node: GPG Configuration Options31630
+Ref: option --homedir40523
+Ref: gpg-option --options43798
+Node: GPG Key related Options63610
+Node: GPG Input and Output67194
+Node: OpenPGP Options72672
+Node: Compliance Options77732
+Node: GPG Esoteric Options80817
+Ref: GPG Esoteric Options-Footnote-1101985
+Node: Deprecated Options102139
+Node: GPG Configuration104118
+Node: GPG Examples107353
+Node: Unattended Usage of GPG111688
+Node: Unattended GPG key generation112128
+Node: Specify a User ID121445
+Ref: how-to-specify-a-user-id121594
+Node: Copying126336
+Node: Option Index163969
+Node: Index205151
 
 End Tag Table

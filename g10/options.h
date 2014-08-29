@@ -30,7 +30,7 @@
 #if defined (__riscos__) && !defined (INCLUDED_BY_MAIN_MODULE)
 #define EXTERN_UNLESS_MAIN_MODULE extern
 #else
-#define EXTERN_UNLESS_MAIN_MODULE 
+#define EXTERN_UNLESS_MAIN_MODULE
 #endif
 #endif
 
@@ -79,14 +79,18 @@ struct
   int def_cert_level;
   int min_cert_level;
   int ask_cert_level;
-  int no_version;
+  int emit_version;       /* 0 = none,
+                             1 = major only,
+                             2 = major and minor,
+                             3 = full version,
+                             4 = full version plus OS string. */
   int marginals_needed;
   int completes_needed;
   int max_cert_depth;
   const char *homedir;
 
   char *display;      /* 5 options to be passed to the gpg-agent */
-  char *ttyname;     
+  char *ttyname;
   char *ttytype;
   char *lc_ctype;
   char *lc_messages;
@@ -208,7 +212,7 @@ struct
 
   /* If > 0, limit the number of card insertion prompts to this
      value. */
-  int limit_card_insert_tries; 
+  int limit_card_insert_tries;
 
 #ifdef ENABLE_CARD_SUPPORT
   const char *ctapi_driver; /* Library to access the ctAPI. */
@@ -293,6 +297,7 @@ struct {
 #define IMPORT_MERGE_ONLY                (1<<4)
 #define IMPORT_MINIMAL                   (1<<5)
 #define IMPORT_CLEAN                     (1<<6)
+#define IMPORT_NO_SECKEY                 (1<<7)
 
 #define EXPORT_LOCAL_SIGS                (1<<0)
 #define EXPORT_ATTRIBUTES                (1<<1)

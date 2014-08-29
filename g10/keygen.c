@@ -210,9 +210,6 @@ do_add_key_flags (PKT_signature *sig, unsigned int use)
     if (use & PUBKEY_USAGE_AUTH)
         buf[0] |= 0x20;
 
-    if (!buf[0])
-        return;
-
     build_sig_subpkt (sig, SIGSUBPKT_KEY_FLAGS, buf, 1);
 }
 
@@ -332,14 +329,15 @@ keygen_set_std_prefs (const char *string,int personal)
 	    if(!check_cipher_algo(CIPHER_ALGO_CAST5))
 	      strcat(dummy_string,"S3 ");
 	    strcat(dummy_string,"S2 "); /* 3DES */
-	    /* If we have it, IDEA goes *after* 3DES so it won't be
+	    /* If we have it and we are in PGP2 mode,
+               IDEA goes *after* 3DES so it won't be
 	       used unless we're encrypting along with a V3 key.
 	       Ideally, we would only put the S1 preference in if the
 	       key was RSA and <=2048 bits, as that is what won't
 	       break PGP2, but that is difficult with the current
 	       code, and not really worth checking as a non-RSA <=2048
 	       bit key wouldn't be usable by PGP2 anyway. -dms */
-	    if(!check_cipher_algo(CIPHER_ALGO_IDEA))
+	    if(PGP2 && !check_cipher_algo(CIPHER_ALGO_IDEA))
 	      strcat(dummy_string,"S1 ");
 
 
@@ -415,12 +413,6 @@ keygen_set_std_prefs (const char *string,int personal)
 	    else
 	      {
 		log_info (_("invalid item `%s' in preference string\n"),tok);
-
-		/* Complain if IDEA is not available. */
-		if(ascii_strcasecmp(tok,"s1")==0
-		   || ascii_strcasecmp(tok,"idea")==0)
-		  idea_cipher_warn(1);
-
 		rc=-1;
 	      }
 	  }
@@ -1047,9 +1039,13 @@ gen_elg(int algo, unsigned nbits, KBNODE pub_root, KBNODE sec_root, DEK *dek,
 
     assert( is_ELGAMAL(algo) );
 
-    if( nbits < 512 ) {
-	nbits = 1024;
+    if (nbits < 1024) {
+	nbits = 2048;
 	log_info(_("keysize invalid; using %u bits\n"), nbits );
+    }
+    else if (nbits > 4096) {
+        nbits = 4096;
+        log_info(_("keysize invalid; using %u bits\n"), nbits );
     }
 
     if( (nbits % 32) ) {
@@ -1129,9 +1125,9 @@ gen_dsa(unsigned int nbits, KBNODE pub_root, KBNODE sec_root, DEK *dek,
     MPI *factors;
     unsigned int qbits;
 
-    if( nbits < 512)
+    if( nbits < 768)
       {
-	nbits = 1024;
+	nbits = 2048;
 	log_info(_("keysize invalid; using %u bits\n"), nbits );
       }
     else if(nbits>3072)
@@ -1261,8 +1257,12 @@ gen_rsa(int algo, unsigned nbits, KBNODE pub_root, KBNODE sec_root, DEK *dek,
     assert( is_RSA(algo) );
 
     if( nbits < 1024 ) {
-	nbits = 1024;
+	nbits = 2048;
 	log_info(_("keysize invalid; using %u bits\n"), nbits );
+    }
+    else if (nbits > 4096) {
+        nbits = 4096;
+        log_info(_("keysize invalid; using %u bits\n"), nbits );
     }
 
     if( (nbits % 32) ) {
@@ -3716,10 +3716,25 @@ gen_card_key_with_backup (int algo, int keyno, int is_primary,
   PKT_public_key *pk;
   size_t n;
   int i;
+  unsigned int nbits;
 
   sk_unprotected = NULL;
   sk_protected = NULL;
-  rc = generate_raw_key (algo, 1024, timestamp,
+
+  /* Get the size of the key directly from the card.  */
+  {
+    struct agent_card_info_s info;
+
+    memset (&info, 0, sizeof info);
+    if (!agent_scd_getattr ("KEY-ATTR", &info)
+        && info.key_attr[1].algo)
+      nbits = info.key_attr[1].nbits;
+    else
+      nbits = 1024; /* All pre-v2.0 cards.  */
+    agent_release_card_info (&info);
+  }
+
+  rc = generate_raw_key (algo, nbits, timestamp,
                          &sk_unprotected, &sk_protected);
   if (rc)
     return rc;

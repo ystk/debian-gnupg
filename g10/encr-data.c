@@ -100,6 +100,16 @@ decrypt_data( void *procctx, PKT_encrypted *ed, DEK *dek )
         write_status_text (STATUS_DECRYPTION_INFO, buf);
     }
 
+    if (opt.show_session_key)
+      {
+        char *buf = xmalloc (dek->keylen*2 + 20);
+        sprintf (buf, "%d:", dek->algo);
+        for (i=0; i < dek->keylen; i++ )
+          sprintf(buf+strlen(buf), "%02X", dek->key[i] );
+        log_info ("session key: `%s'\n", buf);
+        write_status_text (STATUS_SESSION_KEY, buf);
+      }
+
     if( (rc=check_cipher_algo(dek->algo)) )
 	goto leave;
     blocksize = cipher_get_blocksize(dek->algo);
@@ -198,12 +208,10 @@ decrypt_data( void *procctx, PKT_encrypted *ed, DEK *dek )
 	cipher_decrypt ( dfx->cipher_hd, dfx->defer, dfx->defer, 22);
         md_write ( dfx->mdc_hash, dfx->defer, 2);
 	md_final ( dfx->mdc_hash );
-        if (dfx->defer[0] != '\xd3' || dfx->defer[1] != '\x14' ) {
-            log_error("mdc_packet with invalid encoding\n");
-            rc = G10ERR_INVALID_PACKET;
-        }
-	else if ( datalen != 20
-	    || memcmp(md_read( dfx->mdc_hash, 0 ), dfx->defer+2, datalen) )
+        if (   dfx->defer[0] != '\xd3'
+            || dfx->defer[1] != '\x14'
+            || datalen != 20
+	    || memcmp (md_read (dfx->mdc_hash, 0 ), dfx->defer+2, datalen))
 	    rc = G10ERR_BAD_SIGN;
 	/*log_hexdump("MDC calculated:",md_read( dfx->mdc_hash, 0), datalen);*/
 	/*log_hexdump("MDC message   :", dfx->defer, 20);*/

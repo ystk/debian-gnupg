@@ -2,7 +2,7 @@
 # gnupg -- gnu privacy guard
 # This is a template.  The dist target uses it to create the real file.
 #
-%define version 1.4.12
+%define version 1.4.18
 %define name gnupg
 Summary: GNU Utility for data encryption and digital signatures
 Summary(it): Utility GNU per la sicurezza nelle comunicazioni e nell'archiviazione dei dati.
