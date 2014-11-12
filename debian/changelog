@@ -1,3 +1,13 @@
+gnupg (1.4.10-4+squeeze6) squeeze-lts; urgency=high
+
+  * LTS upload.
+  * Fix for CVE-2014-5270: side-channel attacks on Elgamal encryption
+    subkeys.
+  * Filter responses from keyservers to ensure that only keys that were
+    requested are actually imported.
+                
+ -- Matt Palmer <mpalmer@debian.org>  Fri, 12 Sep 2014 08:31:29 +1000
+
 gnupg (1.4.10-4+squeeze5) squeeze-lts; urgency=high
 
   * CVE-2014-4617: Avoid DoS due to garbled compressed data packets.
