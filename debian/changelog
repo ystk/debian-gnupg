@@ -1,3 +1,15 @@
+gnupg (1.4.10-4+squeeze7) squeeze-lts; urgency=low
+
+  * Split CVE-2013-4576.dpatch in two to fixup debian/rules unpatch.
+  * Add patches for following issues:
+    CVE-2014-3591: Use ciphertext blinding for Elgamal decryption to
+    counteract a side-channel attack 
+    CVE-2015-0837: Fix data-dependent timing variations in the modular
+    exponentiation function that could be used to mount a side-channel attack
+    CVE-2015-1606: Fix a use-after-free when importing a garbled keyring file
+
+ -- Raphaël Hertzog <hertzog@debian.org>  Tue, 17 Mar 2015 10:46:14 +0000
+
 gnupg (1.4.10-4+squeeze6) squeeze-lts; urgency=high
 
   * LTS upload.

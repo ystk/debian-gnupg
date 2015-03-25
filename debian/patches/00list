@@ -11,10 +11,14 @@ CVE-2012-6085
 CVE-2013-4242
 CVE-2013-4402
 CVE-2013-4351
-CVE-2013-4576
+CVE-2013-4576-1
+CVE-2013-4576-2
 CVE-2014-4617
 CVE-2014-5270
 screen_keyserver_responses
 make_screening_of_keyserver_result_work_with_multi-key_commands
 add_kbnode_t_for_easier_backporting
 fix_regression_due_to_the_keyserver_import_filter
+CVE-2014-3591
+CVE-2015-0837
+CVE-2015-1606
