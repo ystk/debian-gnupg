@@ -21,7 +21,7 @@ DEB_HOST_ARCH_OS  := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 CONFARGS  = --prefix=/usr --libexecdir=/usr/lib/ \
             --enable-noexecstack
 
-CONFARGS_FULL    = --enable-mailto --with-mailprog=/usr/sbin/sendmail
+CONFARGS_FULL    = --enable-mailto --with-mailprog=/usr/sbin/sendmail --enable-large-secmem
 CONFARGS_MINIMAL = --enable-minimal --enable-rsa --disable-nls --disable-regex --disable-gnupg-iconv --disable-gettext --without-iconv --without-readline --without-zlib --enable-sha256
 
 ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))

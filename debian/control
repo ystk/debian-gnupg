@@ -3,24 +3,30 @@ Section: utils
 Priority: important
 Maintainer: Debian GnuPG-Maintainers <pkg-gnupg-maint@lists.alioth.debian.org>
 Uploaders: Sune Vuorela <debian@pusling.com>,
- Daniel Leidert <dleidert@debian.org>,
- Thijs Kinkhorst <thijs@debian.org>
-Standards-Version: 3.9.5
-Build-Depends: debhelper (>> 7), libz-dev, libldap2-dev, libbz2-dev,
- libusb-dev [!hurd-i386],
- libreadline-dev, file, gettext, 
- libcurl4-gnutls-dev
+           Eric Dorland <eric@debian.org>,
+           Daniel Kahn Gillmor <dkg@fifthhorseman.net>,
+           Thijs Kinkhorst <thijs@debian.org>
+Standards-Version: 3.9.6
+Build-Depends: debhelper (>> 7),
+               file,
+               gettext,
+               libbz2-dev,
+               libcurl4-gnutls-dev,
+               libldap2-dev,
+               libreadline-dev,
+               libusb-dev [!hurd-i386],
+               libz-dev
 Build-Depends-Indep: mingw-w64
 Homepage: http://www.gnupg.org
-Vcs-Browser: http://anonscm.debian.org/viewvc/pkg-gnupg/gnupg/
-Vcs-Svn: svn://anonscm.debian.org/pkg-gnupg/gnupg/trunk/
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-gnupg/gnupg.git
+Vcs-Git: git://anonscm.debian.org/pkg-gnupg/gnupg.git
 
 Package: gnupg
 Architecture: any
 Multi-Arch: foreign
-Depends: ${shlibs:Depends}, ${misc:Depends}, gpgv
-Recommends: ${shlibs:Recommends}, gnupg-curl
-Suggests: gnupg-doc, xloadimage | imagemagick | eog, libpcsclite1, parcimonie
+Depends: gpgv, ${misc:Depends}, ${shlibs:Depends}
+Recommends: gnupg-curl, ${shlibs:Recommends}
+Suggests: gnupg-doc, libpcsclite1, parcimonie, xloadimage | imagemagick | eog
 Description: GNU privacy guard - a free PGP replacement
  GnuPG is GNU's tool for secure communication and data storage.
  It can be used to encrypt data and to create digital signatures.
@@ -40,7 +46,7 @@ Package: gnupg-curl
 Priority: optional
 Architecture: any
 Multi-Arch: foreign
-Depends: ${shlibs:Depends}, ${shlibs:Recommends}, ${misc:Depends}, gnupg
+Depends: gnupg, ${misc:Depends}, ${shlibs:Depends}, ${shlibs:Recommends}
 Description: GNU privacy guard - a free PGP replacement (cURL)
  GnuPG is GNU's tool for secure communication and data storage.
  It can be used to encrypt data and to create digital signatures.
@@ -54,7 +60,7 @@ Description: GNU privacy guard - a free PGP replacement (cURL)
 Package: gpgv
 Architecture: any
 Multi-Arch: foreign
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Suggests: gnupg
 Description: GNU privacy guard - signature verification tool
  GnuPG is GNU's tool for secure communication and data storage.
@@ -69,7 +75,7 @@ Package-Type: udeb
 Section: debian-installer
 Priority: extra
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: GNU privacy guard - a free PGP replacement
  GnuPG is GNU's tool for secure communication and data storage.
  It can be used to encrypt data and to create digital signatures.
@@ -83,7 +89,7 @@ Package-Type: udeb
 Section: debian-installer
 Priority: extra
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: minimal signature verification tool
  GnuPG is GNU's tool for secure communication and data storage.
  It can be used to encrypt data and to create digital signatures.

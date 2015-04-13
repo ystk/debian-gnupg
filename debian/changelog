@@ -1,3 +1,69 @@
+gnupg (1.4.18-7) unstable; urgency=medium
+
+  * import a series of DoS and vulnerabilities from upstream, including
+    CVE-2014-3591
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 02 Mar 2015 19:29:26 +0100
+
+gnupg (1.4.18-6) unstable; urgency=medium
+
+  * revert to debhelper 7
+  * simplify upstream doc synchronization.
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 04 Dec 2014 15:50:59 -0500
+
+gnupg (1.4.18-5) unstable; urgency=medium
+
+  [ Daniel Kahn Gillmor ]
+  * move to debhelper 9
+  * add build and runtime support for larger RSA keys (Closes: #739424)
+  * fix runtime errors on bad input (Closes: #771987)
+  * deprecate insecure one-argument variant for gpg --verify of detached
+    signatures (Closes: #771992)
+  * sync documentation with upstream.
+  * Standards-Version: bump to 3.9.6 (no changes needed).
+
+  [ David Prévot ]
+  * Update POT and PO files, and ensure the translations get rebuild
+  * Update French translation (Closes: #769571)
+  * Update Danish Translation, thanks to Joe Hansen
+  * Update Ukrainian translation, thanks to Yuri Chornoivan
+  * Update Russian translation, thanks to Ineiev
+  * Update Chinese (traditional) translation, thanks to Jedi Lin
+  * Update Italian translation, thanks to Milo Casagrande
+  * Update Polish translation, thanks to Jakub Bogusz
+  * Update Spanish translation, thanks to Manuel "Venturi" Porras Peralta
+    (Closes: #770726)
+  * Update Dutch translation, thanks to Frans Spiesschaert (Closes: #770816)
+  * Update Czech translation, thanks to Roman Pavlik
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 04 Dec 2014 01:11:22 -0500
+
+gnupg (1.4.18-4) unstable; urgency=medium
+
+  * Remove Daniel Leidert from Uploaders at his request.
+  * fix typo in gpg.info (closes: #760288)
+  * Fix regression in keyserver filter (closes: #760392)
+  * added myself to uploaders
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 02 Sep 2014 09:51:13 -0400
+
+gnupg (1.4.18-3) unstable; urgency=medium
+
+  [ Eric Dorland ]
+  * debian/gbp.conf: Add git-buildpackage config and use pristine-tar.
+  * debian/control: Switch to git for VCS.
+  * debian/control: Add Eric Dorland to Uploaders.
+  * Run wrap-and-sort over the debian files.
+  
+  [ Daniel Kahn Gillmor ]
+  * check signatures on upstream tarballs (closes: #711744).
+
+  [ Thijs Kinkhorst ]
+  * Document possible license of doc/OpenPGP (closes: #745408). 
+
+ -- Eric Dorland <eric@debian.org>  Tue, 02 Sep 2014 00:04:20 -0400
+
 gnupg (1.4.18-2) unstable; urgency=medium
 
   [ Cyril Brulebois ]
