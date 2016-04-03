@@ -1,3 +1,10 @@
+gnupg (1.4.18-7+deb8u1) stable; urgency=medium
+
+  [ Jonathan McDowell ]
+  * Import upstream bugfix for handling unknown subkey types (Closes: #787046)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 27 Oct 2015 15:39:42 -0400
+
 gnupg (1.4.18-7) unstable; urgency=medium
 
   * import a series of DoS and vulnerabilities from upstream, including
