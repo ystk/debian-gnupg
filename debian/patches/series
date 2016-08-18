@@ -38,3 +38,5 @@ sync-docs-with-upstream.patch
 0043-doc-Add-warning-note-about-not-acting-as-an-oracle-t.patch
 0044-mpi-Avoid-data-dependent-timing-variations-in-mpi_po.patch
 0045-g10-fix-cmp_public_key-and-cmp_secret_keys.patch
+0046-cipher-Improve-readability-by-using-a-macro.patch
+0047-random-Hash-continuous-areas-in-the-csprng-pool.patch
