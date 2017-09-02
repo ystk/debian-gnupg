@@ -42,3 +42,9 @@ sync-docs-with-upstream.patch
 0047-random-Hash-continuous-areas-in-the-csprng-pool.patch
 0048-gpgv-Tweak-default-options-for-extra-security.patch
 0049-g10-Fix-checking-key-for-signature-validation.patch
+security/CVE-2017-7526-rsa-Add-exponent-blinding.patch
+security/CVE-2017-7526-rsa-Allow-different-build-directory.patch
+security/CVE-2017-7526-rsa-Reduce-secmem-pressure.patch
+security/CVE-2017-7526-mpi-Simplify-mpi_powm.patch
+security/CVE-2017-7526-mpi-Same-computation-for-square-and-multipl.patch
+security/CVE-2017-7526-mpi-Minor-fix-for-mpi_pow.patch
