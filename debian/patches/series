@@ -48,3 +48,4 @@ security/CVE-2017-7526-rsa-Reduce-secmem-pressure.patch
 security/CVE-2017-7526-mpi-Simplify-mpi_powm.patch
 security/CVE-2017-7526-mpi-Same-computation-for-square-and-multipl.patch
 security/CVE-2017-7526-mpi-Minor-fix-for-mpi_pow.patch
+gpg-Sanitize-diagnostic-with-the-original-file-name.patch
